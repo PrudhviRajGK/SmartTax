@@ -2,106 +2,181 @@ import streamlit as st
 
 from form16_parser import Form16Parser
 from groww_parser import GrowwCapitalGainsParser
-from utils import calculate_new_regime_tax, calculate_capital_gains_tax
+from mutual_fund_parser import MutualFundCapitalGainsParser
+from utils import (
+    calculate_new_regime_tax,
+    calculate_equity_stock_capital_gains_tax,
+    calculate_equity_mf_capital_gains_tax,
+    calculate_debt_mf_taxable_income,
+    LTCG_EXEMPTION,
+)
 
-st.set_page_config(page_title="SmartTax AI", layout="wide", page_icon="⚡")
+st.set_page_config(
+    page_title="SmartTax",
+    layout="wide"
+)
 
 
 def main():
-    st.title("⚡ SmartTax AI")
-    st.caption("Form-16 + Capital Gains → One Click Tax")
+    st.title("SmartTax")
+    st.caption("Salary • Stocks • Mutual Funds — Clear & ITR-2 Compliant")
 
-    # ================== SALARY ==================
-    st.header("1️⃣ Upload Form-16")
-    form16_file = st.file_uploader("Upload Form-16 (PDF)", type=["pdf"])
+    # ============================================================
+    # 1. SALARY
+    # ============================================================
 
-    salary_tax = 0.0
+    st.header("Salary Income")
+
+    form16_file = st.file_uploader(
+        "Upload Form-16 (PDF)",
+        type=["pdf"]
+    )
+
+    gross_salary = 0.0
     tds_paid = 0.0
 
     if form16_file:
         parser = Form16Parser()
         data = parser.parse(form16_file)
 
-        st.success("Form-16 Processed Successfully")
+        gross_salary = data.get("gross_salary", 0.0)
+        tds_paid = data.get("tds_paid", 0.0)
 
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Employer", data.get("employer_name", "Unknown"))
-        col2.metric("Gross Salary", f"₹{data.get('gross_salary', 0):,.2f}")
-        col3.metric("TDS Deducted", f"₹{data.get('tds_paid', 0):,.2f}")
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Employer", data.get("employer_name", "Unknown"))
+        c2.metric("Gross Salary", f"₹{gross_salary:,.2f}")
+        c3.metric("TDS Deducted", f"₹{tds_paid:,.2f}")
 
-        salary_res = calculate_new_regime_tax(data.get("gross_salary", 0))
-        salary_tax = salary_res["salary_tax"]
-        tds_paid = data.get("tds_paid", 0)
+    # ============================================================
+    # 2. CAPITAL GAINS (SEPARATE SECTIONS)
+    # ============================================================
 
-    # ================== CAPITAL GAINS ==================
     st.markdown("---")
-    st.header("2️⃣ Capital Gains")
+    st.header("Capital Gains")
 
-    platform = st.selectbox("Select Platform", ["Groww"])
+    col_stocks, col_mf = st.columns(2)
 
-    cg_file = st.file_uploader(
-        "Upload Capital Gains Report (Excel)",
-        type=["xlsx"]
-    )
+    stock_tax = 0.0
+    mf_tax = 0.0
+    debt_extra_income = 0.0
 
-    capital_tax = 0.0
+    # ============================================================
+    # LEFT COLUMN — STOCKS
+    # ============================================================
 
-    if cg_file and platform == "Groww":
-        cg_parser = GrowwCapitalGainsParser()
-        cg_data = cg_parser.parse(cg_file)
+    with col_stocks:
+        st.subheader("Equity Stocks")
 
-        # ---- SAFE extraction (no KeyErrors) ----
-        stcg_before = cg_data.get("stcg_before", 0.0)
-        stcg_after = cg_data.get("stcg_after", 0.0)
-        ltcg_before = cg_data.get("ltcg_before", 0.0)
-        ltcg_after = cg_data.get("ltcg_after", 0.0)
-
-        cg_tax = calculate_capital_gains_tax(
-            stcg_before,
-            stcg_after,
-            ltcg_before,
-            ltcg_after
+        broker = st.selectbox(
+            "Select Broker",
+            ["Groww"],
+            help="Trade-wise equity transactions"
         )
 
-        st.subheader("Capital Gains Breakdown")
+        stock_file = st.file_uploader(
+            "Upload Equity Trades Report (Excel)",
+            type=["xlsx"],
+            key="stocks"
+        )
 
-        c1, c2 = st.columns(2)
+        if stock_file and broker == "Groww":
+            parser = GrowwCapitalGainsParser()
+            stock_data = parser.parse(stock_file)
 
-        with c1:
-            st.write(f"**STCG (Before 23 Jul 2024):** ₹{stcg_before:,.2f}")
-            st.write(f"**STCG (After 23 Jul 2024):** ₹{stcg_after:,.2f}")
-            st.write(f"**LTCG (Before 23 Jul 2024):** ₹{ltcg_before:,.2f}")
-            st.write(f"**LTCG (After 23 Jul 2024):** ₹{ltcg_after:,.2f}")
+            st.markdown("**Parsed Stock Gains**")
+            st.write(stock_data)
 
-        with c2:
-            st.write(f"**STCG Tax:** ₹{cg_tax['stcg_tax']:,.2f}")
-            st.write(f"**LTCG Tax:** ₹{cg_tax['ltcg_tax']:,.2f}")
+            tax = calculate_equity_stock_capital_gains_tax(
+                stock_data["stcg_before"],
+                stock_data["stcg_after"],
+                stock_data["ltcg_before"],
+                stock_data["ltcg_after"],
+            )
 
-            if cg_tax["ltcg_loss_available_for_setoff"] > 0:
-                st.info(
-                    f"📉 **LTCG Loss available for set-off:** "
-                    f"₹{cg_tax['ltcg_loss_available_for_setoff']:,.2f}"
-                )
+            stock_tax = tax["total_capital_gains_tax"]
 
-        capital_tax = cg_tax["total_capital_gains_tax"]
+            st.markdown("**Stock Tax Computation**")
+            c1, c2 = st.columns(2)
+            c1.write(f"STCG Tax: ₹{tax['stcg_tax']:,.2f}")
+            c2.write(f"LTCG Tax: ₹{tax['ltcg_tax']:,.2f}")
 
-    # ================== FINAL TAX ==================
+    # ============================================================
+    # RIGHT COLUMN — MUTUAL FUNDS
+    # ============================================================
+
+    with col_mf:
+        st.subheader("Mutual Funds")
+
+        mf_file = st.file_uploader(
+            "Upload Mutual Fund Capital Gains Summary (Excel)",
+            type=["xlsx"],
+            key="mf"
+        )
+
+        if mf_file:
+            parser = MutualFundCapitalGainsParser()
+            mf = parser.parse(mf_file)
+
+            st.markdown("**Parsed Mutual Fund Gains**")
+            st.write(mf)
+
+            # -------- Equity Mutual Funds --------
+            eq_tax = calculate_equity_mf_capital_gains_tax(
+                mf["equity_stcg"],
+                mf["equity_ltcg"]
+            )
+            mf_tax = eq_tax["total_capital_gains_tax"]
+
+            st.markdown("**Equity Mutual Funds**")
+            st.write(f"STCG: ₹{mf['equity_stcg']:,.2f}")
+            st.write(f"LTCG: ₹{mf['equity_ltcg']:,.2f}")
+            st.write(f"LTCG Exemption: ₹{LTCG_EXEMPTION:,.2f}")
+            st.write(
+                f"Taxable LTCG: ₹{max(0, mf['equity_ltcg'] - LTCG_EXEMPTION):,.2f}"
+            )
+            st.write(f"Equity MF Tax: ₹{mf_tax:,.2f}")
+
+            # -------- Debt Mutual Funds --------
+            debt_extra_income = calculate_debt_mf_taxable_income(
+                mf["debt_stcg"],
+                mf["debt_ltcg"]
+            )
+
+            st.markdown("**Debt Mutual Funds**")
+            st.write(
+                "Debt mutual fund gains are added to income and "
+                "taxed as per slab (post April 2023)."
+            )
+            st.write(f"Debt MF STCG: ₹{mf['debt_stcg']:,.2f}")
+            st.write(f"Debt MF LTCG: ₹{mf['debt_ltcg']:,.2f}")
+            st.write(f"Added to Income: ₹{debt_extra_income:,.2f}")
+
+    # ============================================================
+    # 3. FINAL TAX SUMMARY
+    # ============================================================
+
     st.markdown("---")
-    st.header("3️⃣ Final Tax Liability")
+    st.header("Final Tax Summary (New Regime)")
 
-    total_tax = salary_tax + capital_tax
+    salary_res = calculate_new_regime_tax(
+        gross_salary=gross_salary,
+        extra_income=debt_extra_income
+    )
+
+    salary_tax = salary_res["salary_tax"]
+    total_tax = salary_tax + stock_tax + mf_tax
     net_payable = total_tax - tds_paid
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Salary Tax", f"₹{salary_tax:,.2f}")
-    col2.metric("Capital Gains Tax", f"₹{capital_tax:,.2f}")
-    col3.metric("Total Tax", f"₹{total_tax:,.2f}")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Salary + Debt MF Tax", f"₹{salary_tax:,.2f}")
+    c2.metric("Stock Capital Gains Tax", f"₹{stock_tax:,.2f}")
+    c3.metric("Mutual Fund Equity Tax", f"₹{mf_tax:,.2f}")
+    c4.metric("Total Tax Liability", f"₹{total_tax:,.2f}")
 
     if net_payable < 0:
-        st.balloons()
-        st.success(f"🎉 **REFUND:** ₹{abs(net_payable):,.2f}")
+        st.success(f"Refund Due: ₹{abs(net_payable):,.2f}")
     else:
-        st.error(f"💸 **TAX PAYABLE:** ₹{net_payable:,.2f}")
+        st.error(f"Tax Payable: ₹{net_payable:,.2f}")
 
 
 if __name__ == "__main__":
