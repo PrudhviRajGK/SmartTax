@@ -3,13 +3,18 @@ from datetime import date
 
 CUT_OFF_DATE = date(2024, 7, 23)
 
+
 def parse_amount(val):
     if pd.isna(val):
         return 0.0
 
     s = str(val).replace(",", "").strip()
+
     if s.startswith("(") and s.endswith(")"):
-        return -float(s[1:-1])
+        try:
+            return -float(s[1:-1])
+        except:
+            return 0.0
 
     try:
         return float(s)
@@ -18,43 +23,58 @@ def parse_amount(val):
 
 
 class GrowwCapitalGainsParser:
+    """
+    Robust parser for Groww Equity Trades report
+    """
+
     def parse(self, file):
         df = pd.read_excel(file, header=None)
 
         stcg_before = stcg_after = 0.0
         ltcg_before = ltcg_after = 0.0
 
-        current_section = None
+        mode = None
         headers = None
 
         for i in range(len(df)):
-            first_cell = str(df.iloc[i, 0]).lower()
+            row = df.iloc[i]
+            first_cell = str(row[0]).lower()
 
-            # ---- Detect section ----
+            # ---------------- Detect STCG section ----------------
             if "short term trades" in first_cell:
-                current_section = "STCG"
-                headers = [str(x).lower().strip() for x in df.iloc[i + 1]]
-                continue
-
-            if "long term trades" in first_cell:
-                current_section = "LTCG"
-                headers = [str(x).lower().strip() for x in df.iloc[i + 1]]
-                continue
-
-            # ---- Stop on totals or new section ----
-            if "total" in first_cell or "term trades" in first_cell:
-                current_section = None
+                mode = "STCG"
                 headers = None
                 continue
 
-            # ---- Parse trades ----
-            if current_section and headers:
-                row = df.iloc[i]
+            # ---------------- Detect LTCG section ----------------
+            if "long term trades" in first_cell:
+                mode = "LTCG"
+                headers = None
+                continue
 
+            # ---------------- Detect header row ----------------
+            if mode and headers is None:
+                headers = [str(x).lower().strip() for x in row]
+                continue
+
+            # ---------------- Exit section on TOTAL ----------------
+            if mode and "total" in first_cell:
+                mode = None
+                headers = None
+                continue
+
+            # ---------------- Parse trade rows ----------------
+            if mode and headers:
                 try:
-                    pnl_idx = headers.index("realised p&l")
-                    sell_idx = headers.index("sell date")
-                except ValueError:
+                    pnl_idx = next(
+                        i for i, h in enumerate(headers)
+                        if "p&l" in h or "pnl" in h
+                    )
+                    sell_idx = next(
+                        i for i, h in enumerate(headers)
+                        if "sell" in h and "date" in h
+                    )
+                except StopIteration:
                     continue
 
                 pnl = parse_amount(row[pnl_idx])
@@ -67,13 +87,13 @@ class GrowwCapitalGainsParser:
 
                 is_before = sell_date.date() < CUT_OFF_DATE
 
-                if current_section == "STCG":
+                if mode == "STCG":
                     if is_before:
                         stcg_before += pnl
                     else:
                         stcg_after += pnl
 
-                elif current_section == "LTCG":
+                elif mode == "LTCG":
                     if is_before:
                         ltcg_before += pnl
                     else:
