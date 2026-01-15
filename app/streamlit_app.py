@@ -1,5 +1,10 @@
 import streamlit as st
 
+# ------------------------------------------------------------
+# FORCE CLEAR STREAMLIT CACHE (DEV MODE ONLY)
+# ------------------------------------------------------------
+st.cache_data.clear()
+
 from form16_parser import Form16Parser
 from groww_parser import GrowwCapitalGainsParser
 from mutual_fund_parser import MutualFundCapitalGainsParser
@@ -19,7 +24,7 @@ st.set_page_config(
 
 def main():
     st.title("SmartTax")
-    st.caption("Salary • Stocks • Mutual Funds — Clear & ITR-2 Compliant")
+    st.caption("Salary • Equity Stocks • Mutual Funds (ITR-2 Compliant)")
 
     # ============================================================
     # 1. SALARY
@@ -48,7 +53,7 @@ def main():
         c3.metric("TDS Deducted", f"₹{tds_paid:,.2f}")
 
     # ============================================================
-    # 2. CAPITAL GAINS (SEPARATE SECTIONS)
+    # 2. CAPITAL GAINS
     # ============================================================
 
     st.markdown("---")
@@ -61,7 +66,7 @@ def main():
     debt_extra_income = 0.0
 
     # ============================================================
-    # LEFT COLUMN — STOCKS
+    # LEFT COLUMN — EQUITY STOCKS
     # ============================================================
 
     with col_stocks:
@@ -70,7 +75,7 @@ def main():
         broker = st.selectbox(
             "Select Broker",
             ["Groww"],
-            help="Trade-wise equity transactions"
+            help="Trade-wise equity stock transactions"
         )
 
         stock_file = st.file_uploader(
@@ -83,8 +88,8 @@ def main():
             parser = GrowwCapitalGainsParser()
             stock_data = parser.parse(stock_file)
 
-            st.markdown("**Parsed Stock Gains**")
-            st.write(stock_data)
+            st.markdown("Parsed Stock Gains")
+            st.json(stock_data)
 
             tax = calculate_equity_stock_capital_gains_tax(
                 stock_data["stcg_before"],
@@ -95,10 +100,10 @@ def main():
 
             stock_tax = tax["total_capital_gains_tax"]
 
-            st.markdown("**Stock Tax Computation**")
+            st.markdown("Stock Tax Computation")
             c1, c2 = st.columns(2)
-            c1.write(f"STCG Tax: ₹{tax['stcg_tax']:,.2f}")
-            c2.write(f"LTCG Tax: ₹{tax['ltcg_tax']:,.2f}")
+            c1.metric("STCG Tax", f"₹{tax['stcg_tax']:,.2f}")
+            c2.metric("LTCG Tax", f"₹{tax['ltcg_tax']:,.2f}")
 
     # ============================================================
     # RIGHT COLUMN — MUTUAL FUNDS
@@ -117,17 +122,18 @@ def main():
             parser = MutualFundCapitalGainsParser()
             mf = parser.parse(mf_file)
 
-            st.markdown("**Parsed Mutual Fund Gains**")
-            st.write(mf)
+            st.markdown("Parsed Mutual Fund Gains")
+            st.json(mf)
 
-            # -------- Equity Mutual Funds --------
+            # ---------------- EQUITY MUTUAL FUNDS ----------------
             eq_tax = calculate_equity_mf_capital_gains_tax(
                 mf["equity_stcg"],
                 mf["equity_ltcg"]
             )
+
             mf_tax = eq_tax["total_capital_gains_tax"]
 
-            st.markdown("**Equity Mutual Funds**")
+            st.markdown("Equity Mutual Funds")
             st.write(f"STCG: ₹{mf['equity_stcg']:,.2f}")
             st.write(f"LTCG: ₹{mf['equity_ltcg']:,.2f}")
             st.write(f"LTCG Exemption: ₹{LTCG_EXEMPTION:,.2f}")
@@ -136,16 +142,16 @@ def main():
             )
             st.write(f"Equity MF Tax: ₹{mf_tax:,.2f}")
 
-            # -------- Debt Mutual Funds --------
+            # ---------------- DEBT MUTUAL FUNDS ----------------
             debt_extra_income = calculate_debt_mf_taxable_income(
                 mf["debt_stcg"],
                 mf["debt_ltcg"]
             )
 
-            st.markdown("**Debt Mutual Funds**")
+            st.markdown("Debt Mutual Funds")
             st.write(
                 "Debt mutual fund gains are added to income and "
-                "taxed as per slab (post April 2023)."
+                "taxed as per slab under the new regime."
             )
             st.write(f"Debt MF STCG: ₹{mf['debt_stcg']:,.2f}")
             st.write(f"Debt MF LTCG: ₹{mf['debt_ltcg']:,.2f}")
