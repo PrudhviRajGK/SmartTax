@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+    <h1>If you see this, the server is working</h1>
+    <script>
+        console.log('Test page loaded');
+        fetch('/src/app/main.tsx')
+            .then(r => r.text())
+            .then(t => console.log('main.tsx exists:', t.substring(0, 100)));
+    </script>
+</body>
+</html>
