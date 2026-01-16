@@ -5,3 +5,7 @@ pytesseract
 pymupdf
 Pillow
 reportlab
+fastapi
+uvicorn
+python-multipart
+openpyxl
