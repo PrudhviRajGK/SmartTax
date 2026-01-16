@@ -164,3 +164,110 @@ def calculate_debt_mf_taxable_income(
         taxable_income += debt_ltcg
 
     return round(taxable_income, 2)
+
+
+# ============================================================
+# 5. COMPREHENSIVE TAX CALCULATION (ALL SOURCES)
+# ============================================================
+
+def calculate_complete_tax(
+    gross_salary: float = 0.0,
+    tds_paid: float = 0.0,
+    stcg_before: float = 0.0,
+    stcg_after: float = 0.0,
+    ltcg_before: float = 0.0,
+    ltcg_after: float = 0.0,
+    equity_stcg: float = 0.0,
+    equity_ltcg: float = 0.0,
+    debt_stcg: float = 0.0,
+    debt_ltcg: float = 0.0
+):
+    """
+    Complete tax calculation for ITR-2 (all income sources)
+    Returns comprehensive breakdown matching Streamlit structure
+    """
+    
+    # 1. Calculate Debt MF taxable income (added to salary)
+    debt_mf_income = calculate_debt_mf_taxable_income(debt_stcg, debt_ltcg)
+    
+    # 2. Calculate Salary Tax (New Regime) including debt MF income
+    salary_result = calculate_new_regime_tax(gross_salary, debt_mf_income)
+    
+    # 3. Calculate Equity Stock Capital Gains Tax
+    equity_stock_result = calculate_equity_stock_capital_gains_tax(
+        stcg_before, stcg_after, ltcg_before, ltcg_after
+    )
+    
+    # 4. Calculate Equity Mutual Fund Capital Gains Tax
+    equity_mf_result = calculate_equity_mf_capital_gains_tax(equity_stcg, equity_ltcg)
+    
+    # 5. Calculate LTCG exemptions and taxable amounts
+    total_equity_stock_ltcg = ltcg_before + ltcg_after
+    equity_stock_ltcg_exemption = min(total_equity_stock_ltcg, LTCG_EXEMPTION)
+    equity_stock_taxable_ltcg = max(0.0, total_equity_stock_ltcg - LTCG_EXEMPTION)
+    
+    equity_mf_ltcg_exemption = min(equity_ltcg, LTCG_EXEMPTION)
+    equity_mf_taxable_ltcg = max(0.0, equity_ltcg - LTCG_EXEMPTION)
+    
+    # 6. Aggregate totals
+    salary_tax = salary_result["salary_tax"]
+    equity_stock_tax = equity_stock_result["total_capital_gains_tax"]
+    equity_mf_tax = equity_mf_result["total_capital_gains_tax"]
+    
+    total_capital_gains_tax = equity_stock_tax + equity_mf_tax
+    total_tax_liability = salary_tax + total_capital_gains_tax
+    net_payable = total_tax_liability - tds_paid
+    
+    # 7. Calculate effective rate
+    total_income = (
+        gross_salary + 
+        stcg_before + stcg_after +
+        ltcg_before + ltcg_after + 
+        equity_stcg + equity_ltcg +
+        debt_stcg + debt_ltcg
+    )
+    effective_rate = (total_tax_liability / total_income * 100) if total_income > 0 else 0.0
+    
+    return {
+        # === SALARY SECTION ===
+        "grossSalary": round(gross_salary, 2),
+        "tdsDeducted": round(tds_paid, 2),
+        "taxableIncome": salary_result["taxable_income"],
+        "salaryTax": salary_tax,
+        
+        # === EQUITY STOCKS SECTION ===
+        "equityStocks": {
+            "stcgBefore": round(stcg_before, 2),
+            "stcgAfter": round(stcg_after, 2),
+            "ltcgBefore": round(ltcg_before, 2),
+            "ltcgAfter": round(ltcg_after, 2),
+            "stcgTax": equity_stock_result["stcg_tax"],
+            "ltcgTax": equity_stock_result["ltcg_tax"],
+            "totalEquityStockTax": equity_stock_tax,
+            "ltcgExemption": round(equity_stock_ltcg_exemption, 2),
+            "taxableLtcg": round(equity_stock_taxable_ltcg, 2)
+        },
+        
+        # === MUTUAL FUNDS SECTION ===
+        "mutualFunds": {
+            "equityStcg": round(equity_stcg, 2),
+            "equityLtcg": round(equity_ltcg, 2),
+            "equityLtcgExemption": round(equity_mf_ltcg_exemption, 2),
+            "equityTaxableLtcg": round(equity_mf_taxable_ltcg, 2),
+            "equityStcgTax": equity_mf_result["stcg_tax"],
+            "equityLtcgTax": equity_mf_result["ltcg_tax"],
+            "equityMfTax": equity_mf_tax,
+            "debtStcg": round(debt_stcg, 2),
+            "debtLtcg": round(debt_ltcg, 2),
+            "debtMfIncomeAddedToSalary": debt_mf_income
+        },
+        
+        # === FINAL TAX SUMMARY ===
+        "totalTaxLiability": round(total_tax_liability, 2),
+        "capitalGainsTax": round(total_capital_gains_tax, 2),
+        "equityStockTax": equity_stock_tax,
+        "equityMfTax": equity_mf_tax,
+        "effectiveRate": round(effective_rate, 2),
+        "tdsAlreadyPaid": round(tds_paid, 2),
+        "netPayable": round(net_payable, 2)
+    }
