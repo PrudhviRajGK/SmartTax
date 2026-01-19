@@ -63,20 +63,45 @@ const Dashboard = () => {
                   </Link>
                 </div>
               
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div className="p-5 bg-[rgb(var(--color-bg-secondary))] rounded-lg border border-[rgb(var(--color-border-subtle))]">
-                    <p className="text-[13px] font-medium text-[rgb(var(--color-text-secondary))] mb-2">TDS Paid</p>
+                    <p className="text-[13px] font-medium text-[rgb(var(--color-text-secondary))] mb-2">Salary Tax</p>
                     <p className="text-[24px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
-                      ₹{formatCurrency(itr1State.calculationResult?.tdsAlreadyPaid ?? 0)}
+                      ₹{formatCurrency(itr1State.calculationResult?.finalTaxSummary?.salaryPlusDebtMfTax ?? 0)}
                     </p>
                   </div>
                   <div className="p-5 bg-[rgb(var(--color-bg-secondary))] rounded-lg border border-[rgb(var(--color-border-subtle))]">
-                    <p className="text-[13px] font-medium text-[rgb(var(--color-text-secondary))] mb-2">Effective Tax Rate</p>
+                    <p className="text-[13px] font-medium text-[rgb(var(--color-text-secondary))] mb-2">Cess (4%)</p>
                     <p className="text-[24px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
-                      {itr1State.calculationResult?.effectiveRate ?? 0}%
+                      ₹{formatCurrency(itr1State.calculationResult?.finalTaxSummary?.cess ?? 0)}
+                    </p>
+                  </div>
+                  <div className="p-5 bg-[rgb(var(--color-accent))] rounded-lg border-2 border-[rgb(var(--color-accent))]">
+                    <p className="text-[13px] font-medium text-white/80 mb-2">Total Tax Liability</p>
+                    <p className="text-[24px] font-semibold text-white metric-value">
+                      ₹{formatCurrency(itr1State.calculationResult?.finalTaxSummary?.totalTaxLiability ?? 0)}
                     </p>
                   </div>
                 </div>
+
+                {/* Net Payable / Refund for ITR-1 */}
+                {itr1State.calculationResult?.netPayable !== undefined && (
+                  <div className="mt-4">
+                    {(itr1State.calculationResult.isRefund || itr1State.calculationResult.netPayable < 0) ? (
+                      <div className="p-4 bg-[rgb(var(--color-success-bg))] rounded-lg border border-[rgb(var(--color-success))]">
+                        <p className="text-[15px] font-semibold text-[rgb(var(--color-success))]">
+                          Refund Due: ₹{formatCurrency(Math.abs(itr1State.calculationResult.netPayable))}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-[rgb(var(--color-error-bg))] rounded-lg border border-[rgb(var(--color-error))]">
+                        <p className="text-[15px] font-semibold text-[rgb(var(--color-error))]">
+                          Tax Payable: ₹{formatCurrency(itr1State.calculationResult.netPayable)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </Card>
             )}
 
@@ -102,25 +127,29 @@ const Dashboard = () => {
               
                 <div className="grid grid-cols-4 gap-3 mb-4">
                   <div className="p-4 bg-[rgb(var(--color-bg-secondary))] rounded-lg border border-[rgb(var(--color-border-subtle))]">
-                    <p className="text-[12px] font-medium text-[rgb(var(--color-text-secondary))] mb-1.5">Salary + Debt MF</p>
+                    <p className="text-[12px] font-medium text-[rgb(var(--color-text-secondary))] mb-0.5">Salary + Debt MF</p>
+                    <p className="text-[9px] text-[rgb(var(--color-text-tertiary))] mb-1.5">(before cess)</p>
                     <p className="text-[20px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
                       ₹{formatCurrency(itr2State.calculationResult?.finalTaxSummary?.salaryPlusDebtMfTax ?? itr2State.calculationResult?.salaryTax ?? 0)}
                     </p>
                   </div>
                   <div className="p-4 bg-[rgb(var(--color-bg-secondary))] rounded-lg border border-[rgb(var(--color-border-subtle))]">
-                    <p className="text-[12px] font-medium text-[rgb(var(--color-text-secondary))] mb-1.5">Stock Gains</p>
+                    <p className="text-[12px] font-medium text-[rgb(var(--color-text-secondary))] mb-0.5">Stock Gains</p>
+                    <p className="text-[9px] text-[rgb(var(--color-text-tertiary))] mb-1.5">(before cess)</p>
                     <p className="text-[20px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
                       ₹{formatCurrency(itr2State.calculationResult?.finalTaxSummary?.stockCapitalGainsTax ?? itr2State.calculationResult?.equityStockTax ?? 0)}
                     </p>
                   </div>
                   <div className="p-4 bg-[rgb(var(--color-bg-secondary))] rounded-lg border border-[rgb(var(--color-border-subtle))]">
-                    <p className="text-[12px] font-medium text-[rgb(var(--color-text-secondary))] mb-1.5">MF Equity</p>
+                    <p className="text-[12px] font-medium text-[rgb(var(--color-text-secondary))] mb-0.5">MF Equity</p>
+                    <p className="text-[9px] text-[rgb(var(--color-text-tertiary))] mb-1.5">(before cess)</p>
                     <p className="text-[20px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
                       ₹{formatCurrency(itr2State.calculationResult?.finalTaxSummary?.mutualFundEquityTax ?? itr2State.calculationResult?.equityMfTax ?? 0)}
                     </p>
                   </div>
                   <div className="p-4 bg-[rgb(var(--color-accent))] rounded-lg border-2 border-[rgb(var(--color-accent))]">
-                    <p className="text-[12px] font-medium text-white/80 mb-1.5">Total Liability</p>
+                    <p className="text-[12px] font-medium text-white/80 mb-0.5">Total + Cess</p>
+                    <p className="text-[9px] text-white/70 mb-1.5">(final liability)</p>
                     <p className="text-[20px] font-semibold text-white metric-value">
                       ₹{formatCurrency(itr2State.calculationResult?.finalTaxSummary?.totalTaxLiability ?? itr2State.calculationResult?.totalTaxLiability ?? 0)}
                     </p>
