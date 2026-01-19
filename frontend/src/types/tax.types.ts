@@ -88,6 +88,8 @@ export interface FinalTaxSummary {
   salaryPlusDebtMfTax: number;
   stockCapitalGainsTax: number;
   mutualFundEquityTax: number;
+  totalIncomeTaxBeforeCess: number;
+  cess: number;
   totalTaxLiability: number;
 }
 
