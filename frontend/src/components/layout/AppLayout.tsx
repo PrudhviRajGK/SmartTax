@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { ITR1Sidebar } from './ITR1Sidebar';
 import { ITR2Sidebar } from './ITR2Sidebar';
+import TaxAdvisorChat from '../TaxAdvisorChat';
 
 const AppLayout = () => {
   const location = useLocation();
@@ -24,6 +25,9 @@ const AppLayout = () => {
           </div>
         </main>
       </div>
+      
+      {/* Tax Advisor Chatbot - floating on all pages */}
+      <TaxAdvisorChat />
     </div>
   );
 };
