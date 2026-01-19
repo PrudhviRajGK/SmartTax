@@ -8,6 +8,7 @@ from datetime import datetime
 from app.form16_parser import Form16Parser
 from app.groww_parser import GrowwCapitalGainsParser
 from app.mutual_fund_parser import MutualFundCapitalGainsParser
+from app.chatbot import TaxAdvisorChatbot
 from app import utils
 
 app = FastAPI(title="SmartTax API", version="1.0.0")
@@ -21,10 +22,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize parsers
+# Initialize parsers and chatbot
 form16_parser = Form16Parser()
 groww_parser = GrowwCapitalGainsParser()
 mf_parser = MutualFundCapitalGainsParser()
+chatbot = TaxAdvisorChatbot()
 
 
 # Pydantic Models
@@ -39,6 +41,11 @@ class TaxCalculationRequest(BaseModel):
     equity_ltcg: Optional[float] = 0.0
     debt_stcg: Optional[float] = 0.0
     debt_ltcg: Optional[float] = 0.0
+
+
+class ChatbotRequest(BaseModel):
+    message: str
+    user_context: Optional[dict] = None
 
 
 @app.get("/")
@@ -183,10 +190,20 @@ def calculate_tax(request: TaxCalculationRequest):
         mf_tax = eq_mf_tax_res["total_capital_gains_tax"]
         
         # ============================================================
-        # STEP 5: Calculate Totals (exactly as Streamlit)
+        # STEP 5: Calculate Total Income Tax (before cess)
         # ============================================================
-        total_tax = salary_tax + stock_tax + mf_tax
-        net_payable = total_tax - request.tds_paid
+        total_income_tax_before_cess = salary_tax + stock_tax + mf_tax
+        
+        # ============================================================
+        # STEP 6: Apply 4% Health & Education Cess on TOTAL tax
+        # ============================================================
+        cess = total_income_tax_before_cess * utils.CESS_RATE
+        total_tax_liability = total_income_tax_before_cess + cess
+        
+        # ============================================================
+        # STEP 7: Calculate Net Payable / Refund
+        # ============================================================
+        net_payable = total_tax_liability - request.tds_paid
         
         # ============================================================
         # STEP 6: Calculate Exemptions and Taxable Amounts
@@ -244,7 +261,9 @@ def calculate_tax(request: TaxCalculationRequest):
                     "salaryPlusDebtMfTax": salary_tax,
                     "stockCapitalGainsTax": stock_tax,
                     "mutualFundEquityTax": mf_tax,
-                    "totalTaxLiability": total_tax
+                    "totalIncomeTaxBeforeCess": total_income_tax_before_cess,
+                    "cess": cess,
+                    "totalTaxLiability": total_tax_liability
                 },
                 
                 # === NET PAYABLE / REFUND ===
@@ -257,6 +276,58 @@ def calculate_tax(request: TaxCalculationRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error calculating tax: {str(e)}")
+
+
+@app.post("/chatbot/message")
+def chatbot_message(request: ChatbotRequest):
+    """
+    Tax advisor chatbot endpoint
+    Accepts user message and context, returns AI-generated response
+    """
+    try:
+        # Update chatbot context if provided
+        if request.user_context:
+            chatbot.set_user_context(request.user_context)
+        
+        # Generate response
+        response = chatbot.generate_response(request.message, use_ollama=True)
+        
+        return {
+            "success": True,
+            "data": {
+                "message": response,
+                "timestamp": datetime.utcnow().isoformat() + "Z"
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")
+
+
+@app.get("/chatbot/history")
+def get_chatbot_history():
+    """Get chatbot conversation history"""
+    try:
+        return {
+            "success": True,
+            "data": {
+                "history": chatbot.get_conversation_history()
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching history: {str(e)}")
+
+
+@app.post("/chatbot/clear")
+def clear_chatbot_history():
+    """Clear chatbot conversation history"""
+    try:
+        chatbot.clear_history()
+        return {
+            "success": True,
+            "message": "Conversation history cleared"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error clearing history: {str(e)}")
 
 
 if __name__ == "__main__":
