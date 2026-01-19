@@ -15,11 +15,8 @@ const ITR2Calculate = () => {
   const canCalculate = itr2State.review.status === 'complete';
   const result = itr2State.calculationResult;
 
-  useEffect(() => {
-    if (canCalculate && !itr2State.calculated) {
-      handleCalculate();
-    }
-  }, []);
+  // Check if this is old data without cess field
+  const isOldData = result && !result.finalTaxSummary?.cess && result.finalTaxSummary?.cess !== 0;
 
   const handleCalculate = async () => {
     setLoading(true);
@@ -56,6 +53,9 @@ const ITR2Calculate = () => {
         debt_ltcg: itr2State.mutualFunds.data?.debt_ltcg ?? 0,
       });
       
+      console.log('ITR2 Calculation Result:', calculationResult);
+      console.log('Final Tax Summary:', calculationResult.finalTaxSummary);
+      
       updateITR2('calculationResult', calculationResult);
       updateITR2('calculated', true);
       updateITR2('lastCalculatedAt', new Date().toISOString());
@@ -65,6 +65,21 @@ const ITR2Calculate = () => {
       setLoading(false);
     }
   };
+
+  // Auto-calculate on mount if review is complete but not calculated
+  useEffect(() => {
+    if (canCalculate && !itr2State.calculated) {
+      handleCalculate();
+    }
+  }, []);
+
+  // Auto-recalculate if old data is detected
+  useEffect(() => {
+    if (isOldData && !loading) {
+      console.log('Detected old calculation data, forcing recalculation...');
+      handleCalculate();
+    }
+  }, [isOldData]);
 
   const formatCurrency = (value: number): string => {
     return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -159,16 +174,26 @@ const ITR2Calculate = () => {
             Last calculated: {formatDate(itr2State.lastCalculatedAt)}
           </p>
         </div>
-        <Button onClick={handleCalculate} disabled={loading} variant="secondary">
-          Recalculate
-        </Button>
+        <div className="flex gap-2">
+          {isOldData && (
+            <Button onClick={handleCalculate} disabled={loading} variant="primary">
+              Update Calculation
+            </Button>
+          )}
+          <Button onClick={handleCalculate} disabled={loading} variant="secondary">
+            Recalculate
+          </Button>
+        </div>
       </div>
 
       {/* Tax Summary - 4 Column Layout */}
       <div className="grid grid-cols-4 gap-3">
         <Card padding="md" hover>
-          <p className="text-[13px] text-[rgb(var(--color-text-secondary))] mb-2 font-medium">
+          <p className="text-[13px] text-[rgb(var(--color-text-secondary))] mb-1 font-medium">
             Salary + Debt MF Tax
+          </p>
+          <p className="text-[10px] text-[rgb(var(--color-text-tertiary))] mb-2">
+            (before cess)
           </p>
           <p className="text-[26px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
             {formatCurrency(salaryTax)}
@@ -176,8 +201,11 @@ const ITR2Calculate = () => {
         </Card>
         
         <Card padding="md" hover>
-          <p className="text-[13px] text-[rgb(var(--color-text-secondary))] mb-2 font-medium">
+          <p className="text-[13px] text-[rgb(var(--color-text-secondary))] mb-1 font-medium">
             Stock Capital Gains Tax
+          </p>
+          <p className="text-[10px] text-[rgb(var(--color-text-tertiary))] mb-2">
+            (before cess)
           </p>
           <p className="text-[26px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
             {formatCurrency(stockTax)}
@@ -185,8 +213,11 @@ const ITR2Calculate = () => {
         </Card>
         
         <Card padding="md" hover>
-          <p className="text-[13px] text-[rgb(var(--color-text-secondary))] mb-2 font-medium">
+          <p className="text-[13px] text-[rgb(var(--color-text-secondary))] mb-1 font-medium">
             Mutual Fund Equity Tax
+          </p>
+          <p className="text-[10px] text-[rgb(var(--color-text-tertiary))] mb-2">
+            (before cess)
           </p>
           <p className="text-[26px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
             {formatCurrency(equityMfTax)}
@@ -202,6 +233,32 @@ const ITR2Calculate = () => {
           </p>
         </div>
       </div>
+
+      {/* Cess Breakdown */}
+      <Card className="bg-[rgb(var(--color-bg-tertiary))]">
+        <div className="flex items-center justify-between text-[14px]">
+          <div className="flex items-center gap-6">
+            <div>
+              <span className="text-[rgb(var(--color-text-secondary))]">Total Income Tax (before cess):</span>
+              <span className="ml-2 font-semibold text-[rgb(var(--color-text-primary))]">
+                {formatCurrency(result.finalTaxSummary?.totalIncomeTaxBeforeCess ?? (salaryTax + stockTax + equityMfTax))}
+              </span>
+            </div>
+            <div>
+              <span className="text-[rgb(var(--color-text-secondary))]">+ Health & Education Cess (4%):</span>
+              <span className="ml-2 font-semibold text-[rgb(var(--color-text-primary))]">
+                {formatCurrency(result.finalTaxSummary?.cess ?? 0)}
+              </span>
+            </div>
+          </div>
+          <div>
+            <span className="text-[rgb(var(--color-text-secondary))]">= Total Tax Liability:</span>
+            <span className="ml-2 font-bold text-[rgb(var(--color-text-primary))] text-[16px]">
+              {formatCurrency(totalTaxLiability)}
+            </span>
+          </div>
+        </div>
+      </Card>
 
       {/* Net Payable / Refund */}
       <Card className={`${isRefund ? 'bg-[rgb(var(--color-success-bg))] border-[rgb(var(--color-success))]' : 'bg-[rgb(var(--color-error-bg))] border-[rgb(var(--color-error))]'} border-2`}>
