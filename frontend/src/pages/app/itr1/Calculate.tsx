@@ -13,12 +13,10 @@ const ITR1Calculate = () => {
   const [error, setError] = useState('');
 
   const canCalculate = itr1State.review.status === 'complete';
+  const result = itr1State.calculationResult;
 
-  useEffect(() => {
-    if (canCalculate && !itr1State.calculated) {
-      handleCalculate();
-    }
-  }, []);
+  // Check if this is old data without cess field
+  const isOldData = result && !result.finalTaxSummary?.cess && result.finalTaxSummary?.cess !== 0;
 
   const handleCalculate = async () => {
     setLoading(true);
@@ -42,7 +40,7 @@ const ITR1Calculate = () => {
         return;
       }
 
-      const result = await taxService.calculateTax({
+      const calculationResult = await taxService.calculateTax({
         gross_salary: grossSalary,
         tds_paid: tdsPaid,
         stcg_before: 0,
@@ -55,7 +53,10 @@ const ITR1Calculate = () => {
         debt_ltcg: 0,
       });
       
-      updateITR1('calculationResult', result);
+      console.log('ITR1 Calculation Result:', calculationResult);
+      console.log('Final Tax Summary:', calculationResult.finalTaxSummary);
+      
+      updateITR1('calculationResult', calculationResult);
       updateITR1('calculated', true);
       updateITR1('lastCalculatedAt', new Date().toISOString());
     } catch (err: any) {
@@ -64,6 +65,21 @@ const ITR1Calculate = () => {
       setLoading(false);
     }
   };
+
+  // Auto-calculate on mount if review is complete but not calculated
+  useEffect(() => {
+    if (canCalculate && !itr1State.calculated) {
+      handleCalculate();
+    }
+  }, []);
+
+  // Auto-recalculate if old data is detected
+  useEffect(() => {
+    if (isOldData && !loading) {
+      console.log('Detected old calculation data, forcing recalculation...');
+      handleCalculate();
+    }
+  }, [isOldData]);
 
   const formatCurrency = (value: number | undefined | null): string => {
     if (value === undefined || value === null || isNaN(value)) return '—';
@@ -123,8 +139,6 @@ const ITR1Calculate = () => {
     );
   }
 
-  const result = itr1State.calculationResult;
-
   if (!result) {
     return (
       <div className="space-y-6">
@@ -143,9 +157,13 @@ const ITR1Calculate = () => {
     );
   }
 
-  const totalTax = result.salaryTax || 0;
-  const tdsPaid = result.tdsAlreadyPaid || 0;
-  const netPayable = totalTax - tdsPaid;
+  // Extract values from backend response
+  const salaryTaxBeforeCess = result.finalTaxSummary?.salaryPlusDebtMfTax ?? result.salaryTax ?? 0;
+  const cess = result.finalTaxSummary?.cess ?? 0;
+  const totalTaxLiability = result.finalTaxSummary?.totalTaxLiability ?? 0;
+  const netPayable = result.netPayable ?? 0;
+
+  console.log('Display values:', { salaryTaxBeforeCess, cess, totalTaxLiability, netPayable });
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -159,26 +177,41 @@ const ITR1Calculate = () => {
             Last calculated: {formatDate(itr1State.lastCalculatedAt)}
           </p>
         </div>
-        <Button onClick={handleCalculate} disabled={loading} variant="secondary">
-          Recalculate
-        </Button>
+        <div className="flex gap-2">
+          {isOldData && (
+            <Button onClick={handleCalculate} disabled={loading} variant="primary">
+              Update Calculation
+            </Button>
+          )}
+          <Button onClick={handleCalculate} disabled={loading} variant="secondary">
+            Recalculate
+          </Button>
+        </div>
       </div>
 
       {/* Tax Summary - Simple Layout for ITR-1 */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="p-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Salary Tax</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {formatCurrency(totalTax)}
-          </p>
-        </Card>
-        <Card className="p-4 bg-gray-900 dark:bg-gray-100">
-          <p className="text-sm text-gray-100 dark:text-gray-900 mb-1">Total Tax Liability</p>
-          <p className="text-2xl font-bold text-white dark:text-gray-900">
-            {formatCurrency(totalTax)}
-          </p>
-        </Card>
-      </div>
+      <Card className="p-6">
+        <div className="space-y-4">
+          <div className="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Salary Tax (before cess)</span>
+            <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              {formatCurrency(salaryTaxBeforeCess)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Health & Education Cess (4%)</span>
+            <span className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              {formatCurrency(cess)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center pt-2">
+            <span className="text-base font-medium text-gray-900 dark:text-gray-100">Total Tax Liability</span>
+            <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {formatCurrency(totalTaxLiability)}
+            </span>
+          </div>
+        </div>
+      </Card>
 
       {/* Net Payable / Refund */}
       {netPayable < 0 ? (
