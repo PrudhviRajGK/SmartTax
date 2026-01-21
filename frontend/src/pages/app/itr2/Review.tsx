@@ -10,12 +10,7 @@ const ITR2Review = () => {
   const canProceed = itr2State.salary.status === 'complete';
 
   const handleConfirm = () => {
-    // Debug: Log what's in state before confirming
-    console.log('=== DEBUG: Review - ITR2 State ===');
-    console.log('Salary:', itr2State.salary.data);
-    console.log('Equity:', itr2State.equity.data);
-    console.log('Mutual Funds:', itr2State.mutualFunds.data);
-    
+    // Mark review as complete to enable calculation
     updateITR2('review', { status: 'complete' });
     navigate('/app/itr-2/calculate');
   };

@@ -1,12 +1,24 @@
 import { Link } from 'react-router-dom';
 import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
 import { useITR } from '../../contexts/ITRContext';
+import { useState } from 'react';
 
 const Dashboard = () => {
-  const { itr1State, itr2State } = useITR();
+  const { itr1State, itr2State, resetITR1, resetITR2 } = useITR();
+  const [showConfirmDialog, setShowConfirmDialog] = useState<'itr1' | 'itr2' | null>(null);
 
   const hasITR1Calculation = itr1State.calculated && itr1State.calculationResult !== null;
   const hasITR2Calculation = itr2State.calculated && itr2State.calculationResult !== null;
+
+  const handleClearFiling = (type: 'itr1' | 'itr2') => {
+    if (type === 'itr1') {
+      resetITR1();
+    } else {
+      resetITR2();
+    }
+    setShowConfirmDialog(null);
+  };
 
   const formatDate = (isoString: string) => {
     try {
@@ -55,12 +67,24 @@ const Dashboard = () => {
                       Last calculated: {formatDate(itr1State.lastCalculatedAt!)}
                     </p>
                   </div>
-                  <Link
-                    to="/app/itr-1/calculate"
-                    className="text-[15px] text-[rgb(var(--color-accent))] hover:text-[rgb(var(--color-accent-hover))] font-medium transition-colors"
-                  >
-                    View details →
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to="/app/itr-1/calculate"
+                      className="text-[15px] text-[rgb(var(--color-accent))] hover:text-[rgb(var(--color-accent-hover))] font-medium transition-colors"
+                    >
+                      View details →
+                    </Link>
+                    <button
+                      onClick={() => setShowConfirmDialog('itr1')}
+                      className="p-2 text-[rgb(var(--color-text-tertiary))] hover:text-[rgb(var(--color-error))] hover:bg-[rgb(var(--color-error-bg))] rounded-lg transition-all"
+                      aria-label="Clear ITR-1 filing"
+                      title="Clear ITR-1 filing"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               
                 <div className="grid grid-cols-3 gap-4">
@@ -117,12 +141,24 @@ const Dashboard = () => {
                       Last calculated: {formatDate(itr2State.lastCalculatedAt!)}
                     </p>
                   </div>
-                  <Link
-                    to="/app/itr-2/calculate"
-                    className="text-[15px] text-[rgb(var(--color-accent))] hover:text-[rgb(var(--color-accent-hover))] font-medium transition-colors"
-                  >
-                    View details →
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to="/app/itr-2/calculate"
+                      className="text-[15px] text-[rgb(var(--color-accent))] hover:text-[rgb(var(--color-accent-hover))] font-medium transition-colors"
+                    >
+                      View details →
+                    </Link>
+                    <button
+                      onClick={() => setShowConfirmDialog('itr2')}
+                      className="p-2 text-[rgb(var(--color-text-tertiary))] hover:text-[rgb(var(--color-error))] hover:bg-[rgb(var(--color-error-bg))] rounded-lg transition-all"
+                      aria-label="Clear ITR-2 filing"
+                      title="Clear ITR-2 filing"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               
                 <div className="grid grid-cols-4 gap-3 mb-4">
@@ -264,6 +300,46 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      {showConfirmDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-[rgb(var(--color-error-bg))] flex items-center justify-center flex-shrink-0">
+                  <svg className="w-6 h-6 text-[rgb(var(--color-error))]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-[17px] font-semibold text-[rgb(var(--color-text-primary))] mb-2">
+                    Clear {showConfirmDialog === 'itr1' ? 'ITR-1' : 'ITR-2'} Filing?
+                  </h3>
+                  <p className="text-[15px] text-[rgb(var(--color-text-secondary))] leading-relaxed">
+                    This will permanently delete all data including uploaded documents, calculations, and results. This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowConfirmDialog(null)}
+                >
+                  Cancel
+                </Button>
+                <button
+                  onClick={() => handleClearFiling(showConfirmDialog)}
+                  className="px-5 py-2.5 bg-[rgb(var(--color-error))] text-white rounded-lg font-medium hover:bg-red-700 transition-all text-[15px]"
+                >
+                  Clear Filing
+                </button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

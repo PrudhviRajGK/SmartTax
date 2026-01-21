@@ -53,9 +53,6 @@ const ITR2Calculate = () => {
         debt_ltcg: itr2State.mutualFunds.data?.debt_ltcg ?? 0,
       });
       
-      console.log('ITR2 Calculation Result:', calculationResult);
-      console.log('Final Tax Summary:', calculationResult.finalTaxSummary);
-      
       updateITR2('calculationResult', calculationResult);
       updateITR2('calculated', true);
       updateITR2('lastCalculatedAt', new Date().toISOString());
@@ -76,7 +73,6 @@ const ITR2Calculate = () => {
   // Auto-recalculate if old data is detected
   useEffect(() => {
     if (isOldData && !loading) {
-      console.log('Detected old calculation data, forcing recalculation...');
       handleCalculate();
     }
   }, [isOldData]);

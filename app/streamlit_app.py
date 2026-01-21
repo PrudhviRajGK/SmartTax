@@ -1,3 +1,20 @@
+"""
+DEPRECATED: Streamlit Prototype Application
+
+⚠️ WARNING: This file is deprecated and kept only for reference.
+The production application uses React frontend (frontend/) and FastAPI backend (app/main.py).
+
+This was the initial prototype built with Streamlit for rapid development.
+DO NOT USE THIS IN PRODUCTION.
+
+For the current application, see:
+- Frontend: frontend/src/
+- Backend API: app/main.py
+- Documentation: README.md
+
+Last Updated: 2024 (Deprecated)
+"""
+
 import streamlit as st
 
 # ------------------------------------------------------------

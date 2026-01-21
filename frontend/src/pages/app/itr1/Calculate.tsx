@@ -53,9 +53,6 @@ const ITR1Calculate = () => {
         debt_ltcg: 0,
       });
       
-      console.log('ITR1 Calculation Result:', calculationResult);
-      console.log('Final Tax Summary:', calculationResult.finalTaxSummary);
-      
       updateITR1('calculationResult', calculationResult);
       updateITR1('calculated', true);
       updateITR1('lastCalculatedAt', new Date().toISOString());
@@ -76,7 +73,6 @@ const ITR1Calculate = () => {
   // Auto-recalculate if old data is detected
   useEffect(() => {
     if (isOldData && !loading) {
-      console.log('Detected old calculation data, forcing recalculation...');
       handleCalculate();
     }
   }, [isOldData]);
@@ -162,8 +158,6 @@ const ITR1Calculate = () => {
   const cess = result.finalTaxSummary?.cess ?? 0;
   const totalTaxLiability = result.finalTaxSummary?.totalTaxLiability ?? 0;
   const netPayable = result.netPayable ?? 0;
-
-  console.log('Display values:', { salaryTaxBeforeCess, cess, totalTaxLiability, netPayable });
 
   return (
     <div className="space-y-6 max-w-3xl">

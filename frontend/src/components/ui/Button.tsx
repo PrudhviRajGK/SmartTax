@@ -21,8 +21,7 @@ export const Button: React.FC<ButtonProps> = ({
     disabled:opacity-50 disabled:cursor-not-allowed
     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-accent))] focus-visible:ring-offset-2
     active:scale-[0.98]
-    letter-spacing-[-0.01em]
-  `;
+  `.trim().replace(/\s+/g, ' ');
   
   const variants = {
     primary: `

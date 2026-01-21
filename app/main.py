@@ -1,3 +1,35 @@
+"""
+SmartTax API - Indian Income Tax Filing Backend
+
+FastAPI-based REST API for Indian Income Tax Return (ITR) filing.
+Supports ITR-1 (salary income) and ITR-2 (salary + capital gains).
+
+Features:
+- Form-16 PDF parsing (OCR + table extraction)
+- Equity stock trade parsing (Groww/Zerodha Excel reports)
+- Mutual fund capital gains parsing
+- Tax calculation for FY 2024-25 (New Tax Regime)
+- AI-powered tax advisor chatbot (local LLM via Ollama)
+
+Endpoints:
+    GET  /                      - Health check
+    POST /parse/form16          - Parse Form-16 PDF
+    POST /parse/equity          - Parse equity trades Excel
+    POST /parse/mf              - Parse mutual fund gains Excel
+    POST /calculate/tax         - Calculate total tax liability
+    POST /chatbot/message       - Send message to tax advisor AI
+    GET  /chatbot/history       - Get conversation history
+    POST /chatbot/clear         - Clear conversation history
+
+Security:
+- CORS enabled for localhost:3000, localhost:3001
+- No authentication (local use only)
+- File uploads validated by type
+
+Author: SmartTax Team
+Version: 1.0.0
+"""
+
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -81,17 +113,49 @@ async def parse_form16(file: UploadFile = File(...)):
 
 @app.post("/parse/equity")
 async def parse_equity(file: UploadFile = File(...), broker: str = Form("groww")):
-    """Parse equity trades Excel report from Groww or Zerodha"""
+    """
+    Parse equity stock trades from broker Excel report.
+    
+    Extracts STCG/LTCG data from trade-wise Excel reports.
+    Handles date-based tax rate changes (July 23, 2024).
+    
+    Args:
+        file: Excel file (.xlsx, .xls) with trade data
+        broker: Broker name ("groww" or "zerodha")
+        
+    Returns:
+        dict: {
+            "success": True,
+            "data": {
+                "broker": str,
+                "stcg_before": float,  # STCG before July 23, 2024
+                "stcg_after": float,   # STCG after July 23, 2024
+                "ltcg_before": float,  # LTCG before July 23, 2024
+                "ltcg_after": float    # LTCG after July 23, 2024
+            }
+        }
+        
+    Raises:
+        HTTPException: 400 if file type invalid, 500 if parsing fails
+        
+    Notes:
+        - Zerodha parser not yet implemented (uses Groww parser as fallback)
+        - Date-based split is critical for correct tax calculation
+    """
     try:
         if not file.filename.endswith(('.xlsx', '.xls')):
-            raise HTTPException(status_code=400, detail="Only Excel files are supported")
+            raise HTTPException(
+                status_code=400, 
+                detail="Only Excel files (.xlsx, .xls) are supported"
+            )
         
         contents = await file.read()
         excel_file = io.BytesIO(contents)
         
-        # Currently only Groww parser is implemented
+        # Note: Zerodha parser not yet implemented
+        # Both brokers currently use Groww parser logic
         if broker.lower() == "zerodha":
-            # TODO: Implement Zerodha-specific parser
+            # Future: Implement Zerodha-specific parser
             result = groww_parser.parse(excel_file)
         else:
             result = groww_parser.parse(excel_file)
@@ -108,8 +172,13 @@ async def parse_equity(file: UploadFile = File(...), broker: str = Form("groww")
                 "ltcg_after": result.get("ltcg_after", 0.0)
             }
         }
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error parsing {broker} report: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error parsing {broker} report: {str(e)}"
+        )
 
 
 @app.post("/parse/groww")

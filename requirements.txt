@@ -1,11 +1,23 @@
-streamlit
-pandas
-pdfplumber
-pytesseract
-pymupdf
-Pillow
-reportlab
-fastapi
-uvicorn
-python-multipart
-openpyxl
+# Core API Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# PDF Processing
+pdfplumber==0.10.3
+pymupdf==1.23.8
+pytesseract==0.3.10
+Pillow==10.2.0
+
+# Excel Processing
+pandas==2.1.4
+openpyxl==3.1.2
+
+# HTTP Client
+requests==2.31.0
+
+# Report Generation (optional)
+reportlab==4.0.9
+
+# Legacy Streamlit (deprecated, can be removed)
+streamlit==1.30.0
