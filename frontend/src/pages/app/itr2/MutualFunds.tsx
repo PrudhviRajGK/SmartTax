@@ -32,7 +32,7 @@ const ITR2MutualFunds = () => {
     <div className="space-y-8 max-w-2xl mx-auto">
       <div>
         <h1 className="text-[28px] font-semibold text-[rgb(var(--color-text-primary))] tracking-tight">
-          Mutual Fund Gains
+          Mutual Funds
         </h1>
         <p className="text-[15px] text-[rgb(var(--color-text-secondary))] mt-1.5">
           Upload your mutual fund capital gains report
