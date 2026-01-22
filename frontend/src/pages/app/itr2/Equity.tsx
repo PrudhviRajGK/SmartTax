@@ -35,7 +35,7 @@ const ITR2Equity = () => {
     <div className="space-y-8 max-w-2xl mx-auto">
       <div>
         <h1 className="text-[28px] font-semibold text-[rgb(var(--color-text-primary))] tracking-tight">
-          Equity Stock Gains
+          Capital Gains
         </h1>
         <p className="text-[15px] text-[rgb(var(--color-text-secondary))] mt-1.5">
           Upload your equity trades report from your broker
