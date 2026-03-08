@@ -76,11 +76,11 @@ export const Navbar = () => {
             <button
               onClick={toggleLang}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[rgb(var(--color-border-subtle))] text-[13px] font-semibold transition-all hover:bg-[rgb(var(--color-bg-tertiary))]"
-              title={lang === 'en' ? 'Switch to Hindi' : 'Switch to English'}
+              title="Switch Language (EN → हिं → বাং → ଓ → தமி → తె)"
             >
-              <span className="text-[15px]">{lang === 'en' ? '🇮🇳' : '🇬🇧'}</span>
+              <span className="text-[13px]">🌐</span>
               <span className="text-[rgb(var(--color-text-secondary))]">
-                {lang === 'en' ? 'हिं' : 'EN'}
+                {({'en':'EN','hi':'हिं','bn':'বাং','or':'ଓଡ଼ি','ta':'தமிழ்','te':'తెలుగు'} as Record<string,string>)[lang] ?? 'EN'}
               </span>
             </button>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 
 const SectionAnchor = ({ id }: { id: string }) => <div id={id} style={{ scrollMarginTop: 96 }} />;
@@ -37,6 +37,23 @@ const NAV_LINKS = [
 
 const Info = () => {
   const [active, setActive] = useState("overview");
+
+  // Scroll-driven active section via IntersectionObserver
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    NAV_LINKS.forEach((l) => {
+      const el = document.getElementById(l.id);
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActive(l.id); },
+        { rootMargin: "-20% 0px -65% 0px", threshold: 0 }
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach(o => o.disconnect());
+  }, []);
+
   return (
     <>
       <Navbar />
@@ -48,7 +65,7 @@ const Info = () => {
             <p style={{ fontSize:11, fontWeight:700, color:"rgb(var(--color-text-tertiary))", textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:12 }}>On this page</p>
             <nav style={{ display:"flex", flexDirection:"column", gap:2 }}>
               {NAV_LINKS.map(l => (
-                <a key={l.id} href={`#${l.id}`} onClick={()=>setActive(l.id)} style={{ padding:"7px 12px", fontSize:13, fontWeight:active===l.id?600:400, color:active===l.id?"rgb(var(--color-accent))":"rgb(var(--color-text-secondary))", textDecoration:"none", borderLeft:`2.5px solid ${active===l.id?"rgb(var(--color-accent))":"transparent"}`, borderRadius:"0 6px 6px 0", background:active===l.id?"rgb(var(--color-bg-primary))":"transparent", transition:"all 0.15s" }}>{l.label}</a>
+                <a key={l.id} href={`#${l.id}`} style={{ padding:"7px 12px", fontSize:13, fontWeight:active===l.id?600:400, color:active===l.id?"rgb(var(--color-accent))":"rgb(var(--color-text-secondary))", textDecoration:"none", borderLeft:`2.5px solid ${active===l.id?"rgb(var(--color-accent))":"transparent"}`, borderRadius:"0 6px 6px 0", background:active===l.id?"rgb(var(--color-bg-primary))":"transparent", transition:"all 0.15s" }}>{l.label}</a>
               ))}
             </nav>
             <div style={{ marginTop:24, padding:16, background:"rgb(var(--color-bg-primary))", border:"1px solid rgb(var(--color-border-subtle))", borderRadius:12 }}>

@@ -152,17 +152,17 @@ export default function Landing() {
 
   // Dark mode colour tokens for landing page
   const C = {
-    bg:        dark ? "#1a1f2e" : "#ffffff",
-    bgAlt:     dark ? "#222840" : "#f8fafc",
-    bgCard:    dark ? "#252b3b" : "#ffffff",
-    text:      dark ? "#e8eaf6" : "#1e293b",
-    textSec:   dark ? "#9ba3c0" : "#475569",
-    textMuted: dark ? "#6b7494" : "#94a3b8",
-    border:    dark ? "#2e3650" : "#e2e8f0",
-    borderSub: dark ? "#252b3b" : "#f1f5f9",
-    navBg:     dark ? "rgba(26,31,46,0.97)" : "rgba(255,255,255,0.97)",
+    bg:        dark ? "#0f172a" : "#ffffff",
+    bgAlt:     dark ? "#1e293b" : "#f8fafc",
+    bgCard:    dark ? "#1e293b" : "#ffffff",
+    text:      dark ? "#f1f5f9" : "#1e293b",
+    textSec:   dark ? "#94a3b8" : "#475569",
+    textMuted: dark ? "#64748b" : "#94a3b8",
+    border:    dark ? "#334155" : "#e2e8f0",
+    borderSub: dark ? "#1e293b" : "#f1f5f9",
+    navBg:     dark ? "rgba(15,23,42,0.97)" : "rgba(255,255,255,0.97)",
     accent:    "#1d4ed8",
-    heroGrad:  dark ? "linear-gradient(160deg, #1e2240 0%, #1a1f2e 45%, #1a1f2e 100%)" : "linear-gradient(160deg, #eef2ff 0%, #f8faff 40%, #ffffff 70%)",
+    heroGrad:  dark ? "linear-gradient(160deg, #1e1b4b 0%, #0f172a 40%, #0f172a 70%)" : "linear-gradient(160deg, #eef2ff 0%, #f8faff 40%, #ffffff 70%)",
   };
 
   return (
@@ -187,7 +187,7 @@ export default function Landing() {
 
         .feat-tab { padding: 14px 18px; border-left: 3px solid transparent; border-radius: 0 8px 8px 0; cursor: pointer; transition: all .2s; }
 
-        .ticker-wrap { overflow: hidden; background: #111827; padding: 11px 0; border-top: 1px solid #1f2937; border-bottom: 1px solid #1f2937; }
+        .ticker-wrap { overflow: hidden; background: #0f172a; padding: 12px 0; }
         .ticker-track { display: flex; animation: ticker 28s linear infinite; white-space: nowrap; }
         @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
@@ -371,7 +371,15 @@ export default function Landing() {
                 alt="Professional in business attire"
                 style={{ position: "relative", zIndex: 1, width: 240, height: 340, objectFit: "cover", objectPosition: "top center", borderRadius: "50% 50% 0 0", display: "block" }}
               />
-
+              {/* Trust badge overlaid on photo */}
+              <div style={{ position: "absolute", bottom: 20, left: -10, zIndex: 2, background: "white", border: "1px solid #e2e8f0", borderRadius: 10, padding: "8px 14px", boxShadow: "0 6px 20px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", gap: 7 }}>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#1d4ed8" strokeWidth="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#1d4ed8" strokeWidth="2"/></svg>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "#1e293b" }}>Secured by Supabase</span>
+              </div>
+              <div style={{ position: "absolute", top: 20, right: -10, zIndex: 2, background: "#1d4ed8", borderRadius: 10, padding: "8px 14px", boxShadow: "0 6px 20px rgba(29,78,216,0.3)", display: "flex", alignItems: "center", gap: 7 }}>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="white" strokeWidth="2.5" strokeLinejoin="round"/></svg>
+                <span style={{ fontSize: 12, fontWeight: 600, color: "white" }}>Under 10 seconds</span>
+              </div>
             </div>
 
             {/* RIGHT — Tax card */}
@@ -381,7 +389,7 @@ export default function Landing() {
                   <p style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.08em" }}>Total Tax Liability · FY 2024-25</p>
                   <span style={{ fontSize: 10, background: "#fef3c7", color: "#92400e", fontWeight: 700, padding: "3px 7px", borderRadius: 4, letterSpacing: "0.05em" }}>NEW REGIME</span>
                 </div>
-                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 800, color: dark ? "#e8eaf6" : "#0f172a", lineHeight: 1, marginBottom: 4 }}>₹2,57,752</p>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 40, fontWeight: 800, color: "#0f172a", lineHeight: 1, marginBottom: 4 }}>₹2,57,752</p>
                 <p style={{ fontSize: 11, color: "#94a3b8", marginBottom: 20 }}>including 4% Health & Education Cess</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 11, marginBottom: 18 }}>
                   {[
@@ -395,9 +403,9 @@ export default function Landing() {
                           <div style={{ width: 6, height: 6, borderRadius: "50%", background: b.color }} />
                           <span style={{ fontSize: 11, color: "#64748b" }}>{b.label}</span>
                         </div>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: C.text }}>{b.val}</span>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: "#1e293b" }}>{b.val}</span>
                       </div>
-                      <div style={{ height: 4, background: dark ? "#2e3650" : "#f1f5f9", borderRadius: 2, overflow: "hidden" }}>
+                      <div style={{ height: 4, background: "#f1f5f9", borderRadius: 2, overflow: "hidden" }}>
                         <div style={{ height: "100%", width: `${b.pct}%`, background: b.color, borderRadius: 2 }} />
                       </div>
                     </div>
@@ -422,43 +430,12 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── MAKE IN INDIA BANNER ── */}
-      <div style={{
-        background: "linear-gradient(90deg, #FF9933 0%, #FF9933 33.3%, #ffffff 33.3%, #ffffff 66.6%, #138808 66.6%, #138808 100%)",
-        padding: "0",
-        overflow: "hidden",
-        position: "relative",
-        height: 36,
-      }}>
-        {/* Overlay to keep text readable */}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(20,20,30,0.82) 0%, rgba(10,10,20,0.75) 50%, rgba(20,20,30,0.82) 100%)", zIndex: 1 }} />
-        <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", alignItems: "center", overflow: "hidden" }}>
-          <style>{`
-            @keyframes mib-scroll {
-              0%   { transform: translateX(100vw); }
-              100% { transform: translateX(-100%); }
-            }
-            .mib-track { display: flex; align-items: center; gap: 48px; animation: mib-scroll 22s linear infinite; white-space: nowrap; padding-left: 100vw; }
-            .mib-track:hover { animation-play-state: paused; }
-          `}</style>
-          <div className="mib-track">
-            {["Made in India","Digital India","Atmanirbhar Bharat","Tax Filing Made Simple","Built for Every Indian","SmartTax — Yours, Free"].map((item, i) => (
-              <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 10, fontSize: 12, fontWeight: 700, color: "#ffffff", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                <span style={{ color: "#FF9933", fontSize: 10 }}>◆</span>
-                {item}
-                <span style={{ color: "#ffffff", fontSize: 10, opacity: 0.5 }}>◆</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* ── TICKER ── */}
       <div className="ticker-wrap">
         <div className="ticker-track">
           {[...Array(2)].flatMap((_, i) =>
             ["ITR-1 (Sahaj)","ITR-2","Form-16 Parsing","Groww Integration","Zerodha Integration","Equity STCG/LTCG","Mutual Fund Gains","House Property","Section 87A Rebate","Standard Deduction ₹75,000","Budget 2024 Rules","Debt MF as Income","HP Carry Forward"].map(t => (
-              <span key={`${i}-${t}`} style={{ fontSize: 12, fontWeight: 500, color: "#cbd5e1", padding: "0 28px", borderRight: "1px solid #374151", display: "inline-block" }}>{t}</span>
+              <span key={`${i}-${t}`} style={{ fontSize: 12, fontWeight: 500, color: "#475569", padding: "0 28px", borderRight: "1px solid #1e293b", display: "inline-block" }}>{t}</span>
             ))
           )}
         </div>
@@ -474,11 +451,11 @@ export default function Landing() {
               { label: "Average Completion", val: 4, suffix: " min", note: "Upload to result" },
               { label: "Cost to File", val: 0, prefix: "₹", note: "Always free" },
             ].map((s, i) => (
-              <div key={s.label} style={{ padding: "36px 32px", borderRight: i < 3 ? `1px solid ${C.border}` : "none", ...anim(statsIn, i * 0.08) }}>
-                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 42, fontWeight: 800, color: C.text, lineHeight: 1, marginBottom: 8 }}>
+              <div key={s.label} style={{ padding: "36px 32px", borderRight: i < 3 ? "1px solid #e2e8f0" : "none", ...anim(statsIn, i * 0.08) }}>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 42, fontWeight: 800, color: "#0f172a", lineHeight: 1, marginBottom: 8 }}>
                   {statsIn && <Counter to={s.val} suffix={s.suffix} prefix={s.prefix || ""} />}
                 </p>
-                <p style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 2 }}>{s.label}</p>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "#374151", marginBottom: 2 }}>{s.label}</p>
                 <p style={{ fontSize: 12, color: "#94a3b8" }}>{s.note}</p>
               </div>
             ))}
@@ -505,13 +482,13 @@ export default function Landing() {
               ))}
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ background: C.bgCard, borderRadius: 14, border: `1px solid ${C.border}`, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,.07)", overflow: "hidden" }}>
+              <div style={{ background: C.bgCard, borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: "0 8px 32px rgba(0,0,0,.07)", overflow: "hidden" }}>
                 <div style={{ padding: "14px 18px", background: C.bgAlt, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ display: "flex", gap: 5 }}>
                     {["#fca5a5","#fde68a","#bbf7d0"].map(c => <div key={c} style={{ width: 9, height: 9, borderRadius: "50%", background: c }} />)}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{feat.title}</p>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{feat.title}</p>
                     <p style={{ fontSize: 11, color: "#94a3b8" }}>{feat.subtitle}</p>
                   </div>
                   <span style={{ fontSize: 11, fontWeight: 600, color: feat.badgeColor, background: feat.badgeBg, padding: "3px 10px", borderRadius: 4 }}>{feat.badge}</span>
@@ -558,7 +535,7 @@ export default function Landing() {
                     {i < 3 && <div style={{ width: 2, height: 32, background: `linear-gradient(to bottom, ${s.color}40, transparent)` }} />}
                   </div>
                   <div style={{ paddingBottom: i < 3 ? 16 : 0, paddingTop: 9 }}>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 3 }}>{s.title}</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 3 }}>{s.title}</p>
                     <p style={{ fontSize: 13, color: "#64748b", lineHeight: 1.65 }}>{s.desc}</p>
                   </div>
                 </div>
@@ -576,13 +553,13 @@ export default function Landing() {
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 800, color: C.text, marginBottom: 10 }}>ITR-1 or ITR-2 — which applies to you?</h2>
             <p style={{ fontSize: 16, color: "#64748b" }}>Both forms are fully supported. Use the comparison below to decide.</p>
           </div>
-          <div className="itr-g" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 32, alignItems: "stretch" }}>
-            <div style={{ background: C.bgCard, border: `2px solid ${dark ? "#1e40af" : "#bfdbfe"}`, borderRadius: 14, padding: 32, position: "relative", display: "flex", flexDirection: "column" }}>
+          <div className="itr-g" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 32 }}>
+            <div style={{ border: `2px solid ${dark ? "#1e40af" : "#bfdbfe"}`, borderRadius: 14, padding: 32, position: "relative" }}>
               <div style={{ position: "absolute", top: 0, right: 0, background: "#1d4ed8", color: "white", fontSize: 10, fontWeight: 700, padding: "4px 12px", borderRadius: "0 12px 0 10px", letterSpacing: "0.08em" }}>SAHAJ</div>
               <p style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>ITR-1</p>
               <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 800, color: C.text, marginBottom: 10 }}>For Salaried Individuals</h3>
               <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.72, marginBottom: 24 }}>The simplest form. Upload Form-16 and get an accurate tax computation — standard deduction, slab tax, cess, and Section 87A rebate applied automatically.</p>
-              <div style={{ marginBottom: 20, flex: 1 }}>
+              <div style={{ marginBottom: 28 }}>
                 {[
                   ["Salary income only", true],
                   ["One house property (optional)", true],
@@ -594,26 +571,26 @@ export default function Landing() {
                 ].map(([item, ok]) => (
                   <div key={String(item)} style={{ display: "flex", gap: 10, marginBottom: 9, alignItems: "flex-start" }}>
                     <span style={{ color: ok ? "#16a34a" : "#cbd5e1", fontWeight: 700, fontSize: 14, flexShrink: 0, marginTop: 1 }}>{ok ? "✓" : "✗"}</span>
-                    <span style={{ fontSize: 14, color: ok ? C.text : C.textMuted }}>{item}</span>
+                    <span style={{ fontSize: 14, color: ok ? "#374151" : "#94a3b8" }}>{item}</span>
                   </div>
                 ))}
               </div>
-              <a href="/app/itr-1/salary" className="btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: "auto" }}>File ITR-1</a>
+              <a href="/app/itr-1/salary" className="btn-primary" style={{ width: "100%", justifyContent: "center" }}>File ITR-1</a>
             </div>
-            <div style={{ background: C.bgCard, border: `2px solid ${dark ? "#4338ca" : "#a5b4fc"}`, borderRadius: 14, padding: 32, position: "relative", display: "flex", flexDirection: "column" }}>
+            <div style={{ border: `2px solid ${dark ? "#4338ca" : "#a5b4fc"}`, borderRadius: 14, padding: 32, position: "relative" }}>
               <div style={{ position: "absolute", top: 0, right: 0, background: "#4f46e5", color: "white", fontSize: 10, fontWeight: 700, padding: "4px 12px", borderRadius: "0 12px 0 10px", letterSpacing: "0.08em" }}>INVESTOR</div>
               <p style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>ITR-2</p>
               <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 800, color: C.text, marginBottom: 10 }}>For Investors and Traders</h3>
               <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.72, marginBottom: 24 }}>Covers everything in ITR-1, plus equity stocks, mutual funds, and house property income with full Budget 2024 date-split logic and LTCG exemption.</p>
-              <div style={{ marginBottom: 20, flex: 1 }}>
+              <div style={{ marginBottom: 28 }}>
                 {["Everything in ITR-1","Equity stock STCG and LTCG","Mutual fund gains — Equity and Debt","House property income or loss","Multi-property support","HP loss carry-forward tracking"].map(item => (
                   <div key={item} style={{ display: "flex", gap: 10, marginBottom: 9, alignItems: "flex-start" }}>
                     <span style={{ color: "#16a34a", fontWeight: 700, fontSize: 14, flexShrink: 0, marginTop: 1 }}>✓</span>
-                    <span style={{ fontSize: 14, color: C.text }}>{item}</span>
+                    <span style={{ fontSize: 14, color: "#374151" }}>{item}</span>
                   </div>
                 ))}
               </div>
-              <a href="/app/itr-2/salary" style={{ display: "flex", justifyContent: "center", alignItems: "center", background: "#4f46e5", color: "white", border: "none", padding: "13px 28px", borderRadius: "8px", fontSize: 14, fontWeight: 600, cursor: "pointer", width: "100%", textDecoration: "none", marginTop: "auto" }}>File ITR-2</a>
+              <a href="/app/itr-2/salary" style={{ display: "flex", justifyContent: "center", alignItems: "center", background: "#4f46e5", color: "white", border: "none", padding: "13px 28px", borderRadius: "8px", fontSize: 14, fontWeight: 600, cursor: "pointer", width: "100%", textDecoration: "none" }}>File ITR-2</a>
             </div>
           </div>
           <div style={{ border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden" }}>
@@ -654,7 +631,7 @@ export default function Landing() {
             ].map((r, i) => (
               <div key={r.title} style={{ background: "white", padding: "28px 22px", ...anim(rulesIn, i * 0.05) }}>
                 <span style={{ fontSize: 10, fontWeight: 700, color: C.accent, textTransform: "uppercase", letterSpacing: "0.08em", background: "#eff6ff", padding: "3px 8px", borderRadius: 4, marginBottom: 12, display: "inline-block" }}>{r.tag}</span>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 8 }}>{r.title}</h3>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 8 }}>{r.title}</h3>
                 <p style={{ fontSize: 13, color: "#64748b", lineHeight: 1.65 }}>{r.desc}</p>
               </div>
             ))}
@@ -680,7 +657,7 @@ export default function Landing() {
                   <div key={title} style={{ display: "flex", gap: 14 }}>
                     <svg style={{ flexShrink: 0, marginTop: 3 }} width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#eff6ff"/><path d="M7 12l3 3 7-7" stroke="#1d4ed8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     <div>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: C.text, marginBottom: 2 }}>{title}</p>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "#1e293b", marginBottom: 2 }}>{title}</p>
                       <p style={{ fontSize: 13, color: "#64748b" }}>{desc}</p>
                     </div>
                   </div>
@@ -694,11 +671,11 @@ export default function Landing() {
                 { label: "Supabase Auth", sub: "Secure login" },
                 { label: "Documents Purged", sub: "After parsing" },
               ].map(c => (
-                <div key={c.label} style={{ background: C.bgAlt, border: `1px solid ${C.border}`, borderRadius: 12, padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", textAlign: "center" }}>
+                <div key={c.label} style={{ background: C.bgAlt, border: `1px solid ${C.border}`, borderRadius: 12, padding: "28px 20px", textAlign: "center" }}>
                   <div style={{ width: 44, height: 44, background: "#eff6ff", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
                     <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#1d4ed8" strokeWidth="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#1d4ed8" strokeWidth="2"/></svg>
                   </div>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 3 }}>{c.label}</p>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 3 }}>{c.label}</p>
                   <p style={{ fontSize: 12, color: "#94a3b8" }}>{c.sub}</p>
                 </div>
               ))}
@@ -708,7 +685,7 @@ export default function Landing() {
       </section>
 
       {/* ── FAQ ── */}
-      <section id="faq" style={{ padding: "88px 0", background: C.bgAlt, color: C.text }}>
+      <section id="faq" style={{ padding: "88px 0", background: C.bgAlt }}>
         <div className="container">
           <div ref={faqRef} className="two-col" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 72, alignItems: "flex-start" }}>
             <div style={{ position: "sticky", top: 88, ...anim(faqIn) }}>
@@ -720,7 +697,7 @@ export default function Landing() {
             <div style={{ ...anim(faqIn, 0.12) }}>
               {FAQS.map((faq, i) => (
                 <div key={faq.q} className="faq-item" style={{ borderColor: C.border }}>
-                  <button className="faq-btn" style={{ color: C.text }} onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                  <button className="faq-btn" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
                     {faq.q}
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style={{ transform: openFaq === i ? "rotate(180deg)" : "none", transition: "transform .2s", flexShrink: 0 }}>
                       <path d="M6 9l6 6 6-6" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -796,7 +773,7 @@ export default function Landing() {
                       <span style={{ fontSize: 14, fontWeight: 800, color: m.color }}>{m.initials}</span>
                     </div>
                     <div>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{m.name}</p>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: "#1e293b" }}>{m.name}</p>
                       <p style={{ fontSize: 11, color: "#94a3b8" }}>{m.role}</p>
                     </div>
                   </div>
@@ -819,9 +796,9 @@ export default function Landing() {
                 { label: "Email Us", val: "support@smarttax.in", sub: "Response within 24 hours", icon: <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="#0369a1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg> },
                 { label: "WhatsApp", val: "+91 98765 43212", sub: "Quick queries via chat", icon: <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#16a34a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg> },
               ].map(c => (
-                <div key={c.label} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, transition: "transform 0.2s", padding: "24px 20px", textAlign: "center", transition: "box-shadow .2s, transform .2s" }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow="0 8px 28px rgba(0,0,0,0.08)"; (e.currentTarget as HTMLElement).style.transform="translateY(-3px)"; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow="none"; (e.currentTarget as HTMLElement).style.transform="none"; }}>
+                <div key={c.label} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: "24px 20px", textAlign: "center", transition: "box-shadow .2s, transform .2s" }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow="0 8px 28px rgba(0,0,0,0.08)"; (e.currentTarget as HTMLElement).style.transform="translateY(-3px)"; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow="none"; (e.currentTarget as HTMLElement).style.transform="none"; }}>
                   <div style={{ width: 44, height: 44, background: "#f8fafc", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>{c.icon}</div>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 4 }}>{c.label}</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: "#1e293b", marginBottom: 4 }}>{c.label}</p>
                   <p style={{ fontSize: 14, fontWeight: 600, color: "#1d4ed8", marginBottom: 4 }}>{c.val}</p>
                   <p style={{ fontSize: 11, color: "#94a3b8" }}>{c.sub}</p>
                 </div>
