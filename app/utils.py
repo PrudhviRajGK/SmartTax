@@ -93,7 +93,7 @@ def _calculate_slab_tax(income: float) -> float:
 # 1. SALARY TAX (NEW REGIME)
 # ============================================================
 
-def calculate_new_regime_tax(gross_salary: float, extra_income: float = 0.0):
+def calculate_new_regime_tax(gross_salary: float, extra_income: float = 0.0, hp_income: float = 0.0):
     """
     Calculates tax under New Regime.
     extra_income is used ONLY for:
@@ -104,7 +104,7 @@ def calculate_new_regime_tax(gross_salary: float, extra_income: float = 0.0):
 
     taxable_income = max(
         0.0,
-        gross_salary - STANDARD_DEDUCTION + extra_income
+        gross_salary - STANDARD_DEDUCTION + extra_income + hp_income
     )
 
     tax = _calculate_slab_tax(taxable_income)
@@ -116,8 +116,9 @@ def calculate_new_regime_tax(gross_salary: float, extra_income: float = 0.0):
     return {
         "gross_salary": round(gross_salary, 2),
         "extra_income": round(extra_income, 2),
+        "hp_income_added": round(hp_income, 2), 
         "taxable_income": round(taxable_income, 2),
-        "salary_tax": round(tax, 2),  # WITHOUT cess
+        "salary_tax": round(tax, 2),  
     }
 
 
@@ -211,3 +212,77 @@ def calculate_debt_mf_taxable_income(
         taxable_income += debt_ltcg
 
     return round(taxable_income, 2)
+
+# ============================================================
+# 5. HOUSE PROPERTY INCOME (SECTION 22-24 | NEW REGIME FY 2026-27)
+# ============================================================
+
+class PropertyType(str):
+    SELF_OCCUPIED = "SOP"
+    LET_OUT = "LOP"
+    DEEMED_LET_OUT = "DLOP"
+
+
+def calculate_house_property_income(
+    property_type: str,
+    gross_rent_received: float = 0.0,
+    expected_market_rent: float = 0.0,
+    municipal_taxes_paid: float = 0.0,
+    home_loan_interest: float = 0.0,
+) -> dict:
+    """
+    House Property Income/Loss — New Regime FY 2026-27.
+    SOP: NAV=0, zero interest deduction (New Regime rule).
+    LOP/DLOP: Full Sec 24(b) interest deductible.
+    HP Loss: Cannot set-off against salary; carry forward 8 years intra-head only.
+    """
+    result = {
+        "property_type": property_type,
+        "gross_annual_value": 0.0,
+        "municipal_taxes_paid": 0.0,
+        "net_annual_value": 0.0,
+        "standard_deduction_24a": 0.0,
+        "interest_deduction_24b": 0.0,
+        "hp_income_or_loss": 0.0,
+        "can_setoff_against_salary": False,
+        "carryforward_years": 0,
+        "notes": [],
+    }
+
+    if property_type == "SOP":
+        result["notes"].append(
+            "Self-Occupied under New Regime: NAV = ₹0. No interest deduction under Sec 24(b)."
+        )
+        return result
+
+    # LOP or DLOP
+    if property_type == "LOP":
+        gav = max(gross_rent_received, expected_market_rent)
+    else:
+        gav = expected_market_rent
+        result["notes"].append("DLOP: GAV = Expected Market Rent (deemed rental income).")
+
+    nav = max(0.0, gav - municipal_taxes_paid)
+    std_deduction = nav * 0.30
+    interest_deduction = max(0.0, home_loan_interest)
+    hp_income = nav - std_deduction - interest_deduction
+
+    result.update({
+        "gross_annual_value": round(gav, 2),
+        "municipal_taxes_paid": round(municipal_taxes_paid, 2),
+        "net_annual_value": round(nav, 2),
+        "standard_deduction_24a": round(std_deduction, 2),
+        "interest_deduction_24b": round(interest_deduction, 2),
+        "hp_income_or_loss": round(hp_income, 2),
+    })
+
+    if hp_income < 0:
+        result["carryforward_years"] = 8
+        result["notes"].append(
+            f"HP Loss ₹{abs(round(hp_income)):,.0f} cannot be set-off against salary under "
+            f"New Regime. Carry forward for 8 years (intra-head only)."
+        )
+    else:
+        result["notes"].append("HP Income will be added to total taxable income.")
+
+    return result

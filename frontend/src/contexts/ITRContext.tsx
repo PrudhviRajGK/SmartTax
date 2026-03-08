@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { SectionStatus, Form16Data, TaxCalculationResult } from '../types/tax.types';
+import type {
+  SectionStatus,
+  Form16Data,
+  TaxCalculationResult,
+  HousePropertyEntry,
+  HousePropertyAggregate,
+} from '../types/tax.types';
 
 interface SalarySection {
   status: SectionStatus;
@@ -27,6 +33,13 @@ interface ITR2State {
   mutualFunds: {
     status: SectionStatus;
     data: any;
+  };
+  houseProperty: {
+    status: SectionStatus;
+    /** Array of individual properties, each with their own result */
+    properties: HousePropertyEntry[];
+    /** Aggregated totals across all properties */
+    aggregate: HousePropertyAggregate | null;
   };
   review: ReviewSection;
   calculated: boolean;
@@ -63,6 +76,11 @@ const INITIAL_ITR2_STATE: ITR2State = {
   salary: { status: 'incomplete', data: null },
   equity: { status: 'incomplete', data: null },
   mutualFunds: { status: 'incomplete', data: null },
+  houseProperty: {
+    status: 'incomplete',
+    properties: [],
+    aggregate: null,
+  },
   review: { status: 'incomplete' },
   calculated: false,
   calculationResult: null,
@@ -77,7 +95,13 @@ const STORAGE_KEYS = {
 function loadStateFromStorage<T>(key: string, defaultValue: T): T {
   try {
     const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : defaultValue;
+    if (!saved) return defaultValue;
+    const parsed = JSON.parse(saved);
+    // Migration: if old single-property shape exists, reset house property
+    if (parsed.houseProperty && !Array.isArray(parsed.houseProperty.properties)) {
+      parsed.houseProperty = INITIAL_ITR2_STATE.houseProperty;
+    }
+    return parsed;
   } catch {
     return defaultValue;
   }
@@ -146,7 +170,7 @@ export const ITRProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const validateSalaryData = (itrType: 'itr1' | 'itr2'): ValidationResult => {
     const state = itrType === 'itr1' ? itr1State : itr2State;
-    
+
     if (!state.salary.data) {
       return {
         isValid: false,
@@ -155,7 +179,7 @@ export const ITRProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     const grossSalary = state.salary.data.gross_salary || state.salary.data.salary || 0;
-    
+
     if (grossSalary === 0) {
       return {
         isValid: false,

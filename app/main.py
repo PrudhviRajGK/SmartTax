@@ -73,12 +73,22 @@ class TaxCalculationRequest(BaseModel):
     equity_ltcg: Optional[float] = 0.0
     debt_stcg: Optional[float] = 0.0
     debt_ltcg: Optional[float] = 0.0
-
+    hp_property_type: Optional[str] = "SOP"
+    hp_gross_rent_received: Optional[float] = 0.0
+    hp_expected_market_rent: Optional[float] = 0.0
+    hp_municipal_taxes_paid: Optional[float] = 0.0
+    hp_home_loan_interest: Optional[float] = 0.0
 
 class ChatbotRequest(BaseModel):
     message: str
     user_context: Optional[dict] = None
 
+class HousePropertyRequest(BaseModel):
+    property_type: str = "SOP"           # "SOP" | "LOP" | "DLOP"
+    gross_rent_received: Optional[float] = 0.0
+    expected_market_rent: Optional[float] = 0.0
+    municipal_taxes_paid: Optional[float] = 0.0
+    home_loan_interest: Optional[float] = 0.0
 
 @app.get("/")
 def read_root():
@@ -214,6 +224,21 @@ async def parse_mutual_fund(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Error parsing MF report: {str(e)}")
 
 
+@app.post("/calculate/house-property")
+def calculate_house_property(request: HousePropertyRequest):
+    """Calculate House Property income/loss — standalone endpoint"""
+    try:
+        result = utils.calculate_house_property_income(
+            property_type=request.property_type,
+            gross_rent_received=request.gross_rent_received,
+            expected_market_rent=request.expected_market_rent,
+            municipal_taxes_paid=request.municipal_taxes_paid,
+            home_loan_interest=request.home_loan_interest,
+        )
+        return {"success": True, "data": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"HP calculation error: {str(e)}")
+
 @app.post("/calculate/tax")
 def calculate_tax(request: TaxCalculationRequest):
     """
@@ -228,13 +253,21 @@ def calculate_tax(request: TaxCalculationRequest):
             debt_stcg=request.debt_stcg,
             debt_ltcg=request.debt_ltcg
         )
-        
+        hp_result = utils.calculate_house_property_income(
+            property_type=request.hp_property_type,
+            gross_rent_received=request.hp_gross_rent_received,
+            expected_market_rent=request.hp_expected_market_rent,
+            municipal_taxes_paid=request.hp_municipal_taxes_paid,
+            home_loan_interest=request.hp_home_loan_interest,
+        )
+        hp_income = hp_result["hp_income_or_loss"]
         # ============================================================
         # STEP 2: Calculate Salary Tax (includes debt MF)
         # ============================================================
         salary_res = utils.calculate_new_regime_tax(
             gross_salary=request.gross_salary,
-            extra_income=debt_extra_income
+            extra_income=debt_extra_income,
+            hp_income=max(0.0, hp_income)
         )
         salary_tax = salary_res["salary_tax"]
         
@@ -335,6 +368,19 @@ def calculate_tax(request: TaxCalculationRequest):
                     "totalTaxLiability": total_tax_liability
                 },
                 
+                "houseProperty": {
+                    "propertyType": hp_result["property_type"],
+                    "grossAnnualValue": hp_result["gross_annual_value"],
+                    "municipalTaxesPaid": hp_result["municipal_taxes_paid"],
+                    "netAnnualValue": hp_result["net_annual_value"],
+                    "standardDeduction24a": hp_result["standard_deduction_24a"],
+                    "interest_deduction_24b": hp_result["interest_deduction_24b"],
+                    "hpIncomeOrLoss": hp_result["hp_income_or_loss"],
+                    "canSetoffAgainstSalary": hp_result["can_setoff_against_salary"],
+                    "carryforwardYears": hp_result["carryforward_years"],
+                    "notes": hp_result["notes"],
+                },
+
                 # === NET PAYABLE / REFUND ===
                 "netPayable": net_payable,
                 "isRefund": net_payable < 0,

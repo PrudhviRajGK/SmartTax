@@ -101,7 +101,7 @@ export interface TaxCalculationResult {
   equityMutualFunds?: EquityMutualFunds;
   debtMutualFunds?: DebtMutualFunds;
   finalTaxSummary?: FinalTaxSummary;
-  
+
   // Legacy fields (for backward compatibility)
   grossSalary?: number;
   tdsDeducted?: number;
@@ -115,12 +115,15 @@ export interface TaxCalculationResult {
   equityMfTax?: number;
   effectiveRate?: number;
   tdsAlreadyPaid?: number;
-  
+
   // Common fields
   netPayable: number;
   isRefund?: boolean;
   calculatedAt: string;
   employerName?: string;
+
+  // House property (aggregated result passed to tax engine)
+  houseProperty?: HousePropertyResult;
 }
 
 export interface TaxCalculationRequest {
@@ -134,4 +137,54 @@ export interface TaxCalculationRequest {
   equity_ltcg?: number;
   debt_stcg?: number;
   debt_ltcg?: number;
+  // HP fields — aggregated across all properties
+  hp_property_type?: string;
+  hp_gross_rent_received?: number;
+  hp_expected_market_rent?: number;
+  hp_municipal_taxes_paid?: number;
+  hp_home_loan_interest?: number;
+}
+
+// ============================================================
+// HOUSE PROPERTY TYPES
+// ============================================================
+
+export type PropertyType = 'SOP' | 'LOP' | 'DLOP';
+
+export interface HousePropertyInput {
+  id: string;                      // uuid for keying each property card
+  label: string;                   // e.g. "Property 1"
+  property_type: PropertyType;
+  gross_rent_received: number;
+  expected_market_rent: number;
+  municipal_taxes_paid: number;
+  home_loan_interest: number;
+}
+
+export interface HousePropertyResult {
+  property_type: string;
+  gross_annual_value: number;
+  municipal_taxes_paid: number;
+  net_annual_value: number;
+  standard_deduction_24a: number;
+  interest_deduction_24b: number;
+  hp_income_or_loss: number;
+  can_setoff_against_salary: boolean;
+  carryforward_years: number;
+  notes: string[];
+}
+
+/** Per-property entry stored in context */
+export interface HousePropertyEntry {
+  input: HousePropertyInput;
+  result: HousePropertyResult | null;
+}
+
+/** Aggregate totals across all properties — passed to /calculate/tax */
+export interface HousePropertyAggregate {
+  /** net HP income (positive only — losses not set-offable under new regime) */
+  net_hp_income: number;
+  /** total HP loss carry-forward */
+  total_hp_loss: number;
+  properties: HousePropertyEntry[];
 }

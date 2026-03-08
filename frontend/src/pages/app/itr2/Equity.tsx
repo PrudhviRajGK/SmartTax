@@ -4,6 +4,7 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { FileUpload } from '../../../components/ui/FileUpload';
 import { useITR } from '../../../contexts/ITRContext';
+import { useLang } from '../../../contexts/LanguageContext';
 import { taxService } from '../../../services/tax.service';
 
 type Broker = 'groww' | 'zerodha';
@@ -11,6 +12,7 @@ type Broker = 'groww' | 'zerodha';
 const ITR2Equity = () => {
   const navigate = useNavigate();
   const { itr2State, updateITR2 } = useITR();
+  const { t } = useLang();
   const [broker, setBroker] = useState<Broker>('groww');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -18,7 +20,6 @@ const ITR2Equity = () => {
   const handleEquityUpload = async (file: File) => {
     setLoading(true);
     setError('');
-    
     try {
       const result = await taxService.parseEquity(file, broker);
       updateITR2('equity', { status: 'complete', data: result, broker });
@@ -35,11 +36,9 @@ const ITR2Equity = () => {
     <div className="space-y-8 max-w-2xl mx-auto">
       <div>
         <h1 className="text-[28px] font-semibold text-[rgb(var(--color-text-primary))] tracking-tight">
-          Capital Gains
+          {t('eq.title')}
         </h1>
-        <p className="text-[15px] text-[rgb(var(--color-text-secondary))] mt-1.5">
-          Upload your equity trades report from your broker
-        </p>
+        <p className="text-[15px] text-[rgb(var(--color-text-secondary))] mt-1.5">{t('eq.subtitle')}</p>
       </div>
 
       {error && (
@@ -49,10 +48,9 @@ const ITR2Equity = () => {
       )}
 
       <Card>
-        {/* Broker Selection Dropdown */}
         <div className="mb-6">
           <label htmlFor="broker-select" className="block text-[15px] font-medium text-[rgb(var(--color-text-primary))] mb-2">
-            Select Broker
+            {t('eq.broker_label')}
           </label>
           <select
             id="broker-select"
@@ -64,26 +62,21 @@ const ITR2Equity = () => {
             <option value="zerodha">Zerodha</option>
           </select>
           <p className="text-[13px] text-[rgb(var(--color-text-tertiary))] mt-2">
-            {broker === 'groww' 
-              ? 'Groww parser will be used to process your equity trades report' 
-              : 'Zerodha parser will be used to process your equity trades report'}
+            {broker === 'groww' ? t('eq.broker_hint_groww') : t('eq.broker_hint_zerodha')}
           </p>
         </div>
 
-        {/* File Upload */}
         <FileUpload
-          label="Equity Trades Report (Excel)"
+          label={t('eq.upload_label')}
           accept=".xlsx,.xls"
           onFileSelect={handleEquityUpload}
           description={`Upload your ${broker === 'groww' ? 'Groww' : 'Zerodha'} equity trades report in Excel format`}
         />
-        
+
         {loading && (
           <div className="mt-6 flex items-center justify-center py-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[rgb(var(--color-accent))]"></div>
-            <span className="ml-3 text-[15px] text-[rgb(var(--color-text-secondary))]">
-              Parsing {broker === 'groww' ? 'Groww' : 'Zerodha'} report...
-            </span>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[rgb(var(--color-accent))]" />
+            <span className="ml-3 text-[15px] text-[rgb(var(--color-text-secondary))]">{t('eq.parsing')}</span>
           </div>
         )}
 
@@ -94,25 +87,17 @@ const ITR2Equity = () => {
                 <svg className="w-5 h-5 text-[rgb(var(--color-success))]" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <p className="text-[15px] font-medium text-[rgb(var(--color-success))]">
-                  Equity report uploaded successfully
-                </p>
+                <p className="text-[15px] font-medium text-[rgb(var(--color-success))]">{t('eq.success')}</p>
               </div>
-              <Button onClick={() => navigate('/app/itr-2/mutual-funds')} size="sm">
-                Continue →
-              </Button>
+              <Button onClick={() => navigate('/app/itr-2/mutual-funds')} size="sm">{t('common.continue')}</Button>
             </div>
           </div>
         )}
       </Card>
 
       <div className="flex justify-between">
-        <Button onClick={() => navigate('/app/itr-2/salary')} variant="ghost">
-          ← Back
-        </Button>
-        <Button onClick={() => navigate('/app/itr-2/mutual-funds')} variant="ghost">
-          Skip (Optional) →
-        </Button>
+        <Button onClick={() => navigate('/app/itr-2/salary')} variant="ghost">{t('common.back')}</Button>
+        <Button onClick={() => navigate('/app/itr-2/mutual-funds')} variant="ghost">{t('common.skip')}</Button>
       </div>
     </div>
   );

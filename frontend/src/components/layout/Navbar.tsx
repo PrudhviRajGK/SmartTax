@@ -1,18 +1,20 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 import { useTheme } from '../../theme/ThemeContext';
+import { useLang } from '../../contexts/LanguageContext';
 import { useState, useRef, useEffect } from 'react';
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { lang, toggleLang, t } = useLang();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
     };
@@ -21,82 +23,68 @@ export const Navbar = () => {
   }, []);
 
   const isActive = (path: string) => location.pathname === path;
+  const startsWith = (path: string) => location.pathname.startsWith(path);
 
-  const getUserInitials = (email: string): string => {
-    return email.substring(0, 2).toUpperCase();
-  };
+  const getUserInitials = (email: string) => email.substring(0, 2).toUpperCase();
+
+  const navLinkClass = (active: boolean) =>
+    `px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${
+      active
+        ? 'text-[rgb(var(--color-text-primary))] bg-[rgb(var(--color-bg-tertiary))]'
+        : 'text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-bg-tertiary))]'
+    }`;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgb(var(--color-bg-primary))] border-b border-[rgb(var(--color-border-subtle))] backdrop-blur-sm bg-opacity-90">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center space-x-10">
-            <Link 
-              to="/" 
+
+          {/* Logo + Nav Links */}
+          <div className="flex items-center space-x-8">
+            <Link
+              to="/"
               className="text-[17px] font-semibold text-[rgb(var(--color-text-primary))] tracking-tight hover:opacity-80 transition-opacity"
             >
               SmartTax
             </Link>
 
-            {/* Navigation Links */}
             {user && (
               <div className="hidden md:flex items-center space-x-1">
-                <Link
-                  to="/app/dashboard"
-                  className={`
-                    px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150
-                    ${isActive('/app/dashboard') 
-                      ? 'text-[rgb(var(--color-text-primary))] bg-[rgb(var(--color-bg-tertiary))]' 
-                      : 'text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-bg-tertiary))]'
-                    }
-                  `}
-                >
-                  Overview
+                <Link to="/app/dashboard" className={navLinkClass(isActive('/app/dashboard'))}>
+                  {t('nav.overview')}
                 </Link>
-                <Link
-                  to="/app/itr-1/salary"
-                  className={`
-                    px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150
-                    ${location.pathname.startsWith('/app/itr-1')
-                      ? 'text-[rgb(var(--color-text-primary))] bg-[rgb(var(--color-bg-tertiary))]' 
-                      : 'text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-bg-tertiary))]'
-                    }
-                  `}
-                >
+                <Link to="/app/itr-1/salary" className={navLinkClass(startsWith('/app/itr-1'))}>
                   ITR-1
                 </Link>
-                <Link
-                  to="/app/itr-2/salary"
-                  className={`
-                    px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150
-                    ${location.pathname.startsWith('/app/itr-2')
-                      ? 'text-[rgb(var(--color-text-primary))] bg-[rgb(var(--color-bg-tertiary))]' 
-                      : 'text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-bg-tertiary))]'
-                    }
-                  `}
-                >
+                <Link to="/app/itr-2/salary" className={navLinkClass(startsWith('/app/itr-2'))}>
                   ITR-2
                 </Link>
-                <Link
-                  to="/info"
-                  className={`
-                    px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150
-                    ${isActive('/info')
-                      ? 'text-[rgb(var(--color-text-primary))] bg-[rgb(var(--color-bg-tertiary))]' 
-                      : 'text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-bg-tertiary))]'
-                    }
-                  `}
-                >
-                  Info
+                <Link to="/app/history" className={navLinkClass(isActive('/app/history'))}>
+                  {t('nav.history')}
+                </Link>
+                <Link to="/info" className={navLinkClass(isActive('/info'))}>
+                  {t('nav.info')}
                 </Link>
               </div>
             )}
           </div>
 
-          {/* Right Side Actions */}
-          <div className="flex items-center space-x-3">
-            {/* Theme Toggle */}
+          {/* Right actions */}
+          <div className="flex items-center space-x-2">
+
+            {/* Hindi / English toggle */}
+            <button
+              onClick={toggleLang}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[rgb(var(--color-border-subtle))] text-[13px] font-semibold transition-all hover:bg-[rgb(var(--color-bg-tertiary))]"
+              title={lang === 'en' ? 'Switch to Hindi' : 'Switch to English'}
+            >
+              <span className="text-[15px]">{lang === 'en' ? '🇮🇳' : '🇬🇧'}</span>
+              <span className="text-[rgb(var(--color-text-secondary))]">
+                {lang === 'en' ? 'हिं' : 'EN'}
+              </span>
+            </button>
+
+            {/* Theme toggle */}
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-bg-tertiary))] transition-all duration-150"
@@ -113,7 +101,7 @@ export const Navbar = () => {
               )}
             </button>
 
-            {/* User Menu */}
+            {/* User menu */}
             {user && (
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -131,23 +119,25 @@ export const Navbar = () => {
                         {user.email}
                       </p>
                     </div>
-                    
                     <Link
                       to="/app/profile"
                       onClick={() => setDropdownOpen(false)}
-                      className="block px-4 py-2.5 text-[15px] text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-bg-tertiary))] transition-colors duration-150"
+                      className="block px-4 py-2.5 text-[15px] text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-bg-tertiary))] transition-colors"
                     >
-                      Profile
+                      {t('nav.profile')}
                     </Link>
-                    
-                    <button
-                      onClick={() => {
-                        signOut();
-                        setDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2.5 text-[15px] text-[rgb(var(--color-error))] hover:bg-[rgb(var(--color-error-bg))] transition-colors duration-150"
+                    <Link
+                      to="/app/history"
+                      onClick={() => setDropdownOpen(false)}
+                      className="block px-4 py-2.5 text-[15px] text-[rgb(var(--color-text-primary))] hover:bg-[rgb(var(--color-bg-tertiary))] transition-colors"
                     >
-                      Sign out
+                      {t('nav.history')}
+                    </Link>
+                    <button
+                      onClick={() => { signOut(); setDropdownOpen(false); }}
+                      className="w-full text-left px-4 py-2.5 text-[15px] text-[rgb(var(--color-error))] hover:bg-[rgb(var(--color-error-bg))] transition-colors"
+                    >
+                      {t('nav.signout')}
                     </button>
                   </div>
                 )}

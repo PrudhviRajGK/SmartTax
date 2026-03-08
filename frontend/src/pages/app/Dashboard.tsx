@@ -1,345 +1,371 @@
-import { Link } from 'react-router-dom';
-import { Card } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useITR } from '../../contexts/ITRContext';
-import { useState } from 'react';
+import { useLang } from '../../contexts/LanguageContext';
 
-const Dashboard = () => {
-  const { itr1State, itr2State, resetITR1, resetITR2 } = useITR();
-  const [showConfirmDialog, setShowConfirmDialog] = useState<'itr1' | 'itr2' | null>(null);
+// ─── Eligibility Quiz ─────────────────────────────────────────────────────────
 
-  const hasITR1Calculation = itr1State.calculated && itr1State.calculationResult !== null;
-  const hasITR2Calculation = itr2State.calculated && itr2State.calculationResult !== null;
+const QUIZ_QUESTIONS = ['quiz.q1', 'quiz.q2', 'quiz.q3', 'quiz.q4'];
 
-  const handleClearFiling = (type: 'itr1' | 'itr2') => {
-    if (type === 'itr1') {
-      resetITR1();
-    } else {
-      resetITR2();
-    }
-    setShowConfirmDialog(null);
-  };
+function EligibilityQuiz({ onClose }: { onClose: () => void }) {
+  const { t } = useLang();
+  const navigate = useNavigate();
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState<boolean[]>([]);
 
-  const formatDate = (isoString: string) => {
-    try {
-      const date = new Date(isoString);
-      return date.toLocaleString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    } catch {
-      return 'Unknown';
+  const answer = (val: boolean) => {
+    const next = [...answers, val];
+    setAnswers(next);
+    if (step < QUIZ_QUESTIONS.length - 1) {
+      setStep(step + 1);
     }
   };
 
-  const formatCurrency = (value: number): string => {
-    return value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
+  const isDone = answers.length === QUIZ_QUESTIONS.length;
+  // Q2/Q3/Q4 = stocks, multiple properties, income > 50L → ITR-2
+  const needsITR2 = answers[1] || answers[2] || answers[3];
+  const result = needsITR2 ? 'itr2' : 'itr1';
+
+  const retake = () => { setStep(0); setAnswers([]); };
 
   return (
-    <div className="min-h-screen bg-[rgb(var(--color-bg-secondary))] pt-24 pb-16">
-      <div className="max-w-6xl mx-auto px-6">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-[32px] font-semibold text-[rgb(var(--color-text-primary))] tracking-tight mb-2">
-            Overview
-          </h1>
-          <p className="text-[15px] text-[rgb(var(--color-text-secondary))]">
-            Your tax filing summary and status
-          </p>
+        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-5">
+          <h2 className="text-[18px] font-bold text-white">{t('quiz.title')}</h2>
+          <p className="text-indigo-200 text-[13px] mt-0.5">{t('quiz.subtitle')}</p>
         </div>
 
-        {/* Calculation Results */}
-        {(hasITR1Calculation || hasITR2Calculation) ? (
-          <div className="space-y-6 stagger-children">
-            {/* ITR-1 Result */}
-            {hasITR1Calculation && (
-              <Card padding="lg" hover>
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <h2 className="text-[20px] font-semibold text-[rgb(var(--color-text-primary))] tracking-tight">
-                      ITR-1 Filing
-                    </h2>
-                    <p className="text-[13px] text-[rgb(var(--color-text-tertiary))] mt-1">
-                      Last calculated: {formatDate(itr1State.lastCalculatedAt!)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Link
-                      to="/app/itr-1/calculate"
-                      className="text-[15px] text-[rgb(var(--color-accent))] hover:text-[rgb(var(--color-accent-hover))] font-medium transition-colors"
-                    >
-                      View details →
-                    </Link>
-                    <button
-                      onClick={() => setShowConfirmDialog('itr1')}
-                      className="p-2 text-[rgb(var(--color-text-tertiary))] hover:text-[rgb(var(--color-error))] hover:bg-[rgb(var(--color-error-bg))] rounded-lg transition-all"
-                      aria-label="Clear ITR-1 filing"
-                      title="Clear ITR-1 filing"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="p-5 bg-[rgb(var(--color-bg-secondary))] rounded-lg border border-[rgb(var(--color-border-subtle))]">
-                    <p className="text-[13px] font-medium text-[rgb(var(--color-text-secondary))] mb-2">Salary Tax</p>
-                    <p className="text-[24px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
-                      ₹{formatCurrency(itr1State.calculationResult?.finalTaxSummary?.salaryPlusDebtMfTax ?? 0)}
-                    </p>
-                  </div>
-                  <div className="p-5 bg-[rgb(var(--color-bg-secondary))] rounded-lg border border-[rgb(var(--color-border-subtle))]">
-                    <p className="text-[13px] font-medium text-[rgb(var(--color-text-secondary))] mb-2">Cess (4%)</p>
-                    <p className="text-[24px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
-                      ₹{formatCurrency(itr1State.calculationResult?.finalTaxSummary?.cess ?? 0)}
-                    </p>
-                  </div>
-                  <div className="p-5 bg-[rgb(var(--color-accent))] rounded-lg border-2 border-[rgb(var(--color-accent))]">
-                    <p className="text-[13px] font-medium text-white/80 mb-2">Total Tax Liability</p>
-                    <p className="text-[24px] font-semibold text-white metric-value">
-                      ₹{formatCurrency(itr1State.calculationResult?.finalTaxSummary?.totalTaxLiability ?? 0)}
-                    </p>
-                  </div>
-                </div>
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors text-lg leading-none"
+        >
+          ×
+        </button>
 
-                {/* Net Payable / Refund for ITR-1 */}
-                {itr1State.calculationResult?.netPayable !== undefined && (
-                  <div className="mt-4">
-                    {(itr1State.calculationResult.isRefund || itr1State.calculationResult.netPayable < 0) ? (
-                      <div className="p-4 bg-[rgb(var(--color-success-bg))] rounded-lg border border-[rgb(var(--color-success))]">
-                        <p className="text-[15px] font-semibold text-[rgb(var(--color-success))]">
-                          Refund Due: ₹{formatCurrency(Math.abs(itr1State.calculationResult.netPayable))}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="p-4 bg-[rgb(var(--color-error-bg))] rounded-lg border border-[rgb(var(--color-error))]">
-                        <p className="text-[15px] font-semibold text-[rgb(var(--color-error))]">
-                          Tax Payable: ₹{formatCurrency(itr1State.calculationResult.netPayable)}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Card>
-            )}
-
-            {/* ITR-2 Result */}
-            {hasITR2Calculation && (
-              <Card padding="lg" hover>
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <h2 className="text-[20px] font-semibold text-[rgb(var(--color-text-primary))] tracking-tight">
-                      ITR-2 Filing
-                    </h2>
-                    <p className="text-[13px] text-[rgb(var(--color-text-tertiary))] mt-1">
-                      Last calculated: {formatDate(itr2State.lastCalculatedAt!)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Link
-                      to="/app/itr-2/calculate"
-                      className="text-[15px] text-[rgb(var(--color-accent))] hover:text-[rgb(var(--color-accent-hover))] font-medium transition-colors"
-                    >
-                      View details →
-                    </Link>
-                    <button
-                      onClick={() => setShowConfirmDialog('itr2')}
-                      className="p-2 text-[rgb(var(--color-text-tertiary))] hover:text-[rgb(var(--color-error))] hover:bg-[rgb(var(--color-error-bg))] rounded-lg transition-all"
-                      aria-label="Clear ITR-2 filing"
-                      title="Clear ITR-2 filing"
-                    >
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              
-                <div className="grid grid-cols-4 gap-3 mb-4">
-                  <div className="p-4 bg-[rgb(var(--color-bg-secondary))] rounded-lg border border-[rgb(var(--color-border-subtle))]">
-                    <p className="text-[12px] font-medium text-[rgb(var(--color-text-secondary))] mb-0.5">Salary + Debt MF</p>
-                    <p className="text-[9px] text-[rgb(var(--color-text-tertiary))] mb-1.5">(before cess)</p>
-                    <p className="text-[20px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
-                      ₹{formatCurrency(itr2State.calculationResult?.finalTaxSummary?.salaryPlusDebtMfTax ?? itr2State.calculationResult?.salaryTax ?? 0)}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-[rgb(var(--color-bg-secondary))] rounded-lg border border-[rgb(var(--color-border-subtle))]">
-                    <p className="text-[12px] font-medium text-[rgb(var(--color-text-secondary))] mb-0.5">Stock Gains</p>
-                    <p className="text-[9px] text-[rgb(var(--color-text-tertiary))] mb-1.5">(before cess)</p>
-                    <p className="text-[20px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
-                      ₹{formatCurrency(itr2State.calculationResult?.finalTaxSummary?.stockCapitalGainsTax ?? itr2State.calculationResult?.equityStockTax ?? 0)}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-[rgb(var(--color-bg-secondary))] rounded-lg border border-[rgb(var(--color-border-subtle))]">
-                    <p className="text-[12px] font-medium text-[rgb(var(--color-text-secondary))] mb-0.5">MF Equity</p>
-                    <p className="text-[9px] text-[rgb(var(--color-text-tertiary))] mb-1.5">(before cess)</p>
-                    <p className="text-[20px] font-semibold text-[rgb(var(--color-text-primary))] metric-value">
-                      ₹{formatCurrency(itr2State.calculationResult?.finalTaxSummary?.mutualFundEquityTax ?? itr2State.calculationResult?.equityMfTax ?? 0)}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-[rgb(var(--color-accent))] rounded-lg border-2 border-[rgb(var(--color-accent))]">
-                    <p className="text-[12px] font-medium text-white/80 mb-0.5">Total + Cess</p>
-                    <p className="text-[9px] text-white/70 mb-1.5">(final liability)</p>
-                    <p className="text-[20px] font-semibold text-white metric-value">
-                      ₹{formatCurrency(itr2State.calculationResult?.finalTaxSummary?.totalTaxLiability ?? itr2State.calculationResult?.totalTaxLiability ?? 0)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Net Payable / Refund */}
-                {itr2State.calculationResult?.netPayable !== undefined && (
-                  <div>
-                    {(itr2State.calculationResult.isRefund || itr2State.calculationResult.netPayable < 0) ? (
-                      <div className="p-4 bg-[rgb(var(--color-success-bg))] rounded-lg border border-[rgb(var(--color-success))]">
-                        <p className="text-[15px] font-semibold text-[rgb(var(--color-success))]">
-                          Refund Due: ₹{formatCurrency(Math.abs(itr2State.calculationResult.netPayable))}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="p-4 bg-[rgb(var(--color-error-bg))] rounded-lg border border-[rgb(var(--color-error))]">
-                        <p className="text-[15px] font-semibold text-[rgb(var(--color-error))]">
-                          Tax Payable: ₹{formatCurrency(itr2State.calculationResult.netPayable)}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Card>
-            )}
-          </div>
-        ) : (
-          /* No calculations yet */
-          <Card padding="lg">
-            <div className="text-center py-16">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-[rgb(var(--color-bg-tertiary))] flex items-center justify-center">
-                <svg className="w-8 h-8 text-[rgb(var(--color-text-tertiary))]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+        <div className="p-6">
+          {!isDone ? (
+            <>
+              {/* Progress bar */}
+              <div className="flex gap-1.5 mb-6">
+                {QUIZ_QUESTIONS.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                      i <= step ? 'bg-indigo-500' : 'bg-gray-200 dark:bg-gray-700'
+                    }`}
+                  />
+                ))}
               </div>
-              <h3 className="text-[20px] font-semibold text-[rgb(var(--color-text-primary))] mb-2 tracking-tight">
-                No filings yet
-              </h3>
-              <p className="text-[15px] text-[rgb(var(--color-text-secondary))] mb-8 max-w-md mx-auto">
-                Start your tax filing by choosing the appropriate ITR form based on your income sources
+
+              <p className="text-[11px] font-semibold text-indigo-500 uppercase tracking-wide mb-2">
+                Question {step + 1} of {QUIZ_QUESTIONS.length}
               </p>
-            
-              <div className="flex items-center justify-center gap-3">
-                <Link
-                  to="/app/itr-1/salary"
-                  className="px-6 py-3 bg-[rgb(var(--color-accent))] text-white rounded-lg font-medium hover:bg-[rgb(var(--color-accent-hover))] transition-all shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] text-[15px]"
-                >
-                  Start ITR-1
-                </Link>
-                <Link
-                  to="/app/itr-2/salary"
-                  className="px-6 py-3 bg-[rgb(var(--color-bg-primary))] text-[rgb(var(--color-text-primary))] border border-[rgb(var(--color-border))] rounded-lg font-medium hover:bg-[rgb(var(--color-bg-tertiary))] transition-all text-[15px]"
-                >
-                  Start ITR-2
-                </Link>
-              </div>
-            </div>
-          </Card>
-        )}
+              <p className="text-[17px] font-semibold text-gray-800 dark:text-white mb-6 leading-snug">
+                {t(QUIZ_QUESTIONS[step])}
+              </p>
 
-        {/* Form Info Cards */}
-        <div className="grid md:grid-cols-2 gap-6 mt-8 stagger-children">
-          <Card padding="lg" hover>
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-[rgb(var(--color-accent-light))] rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-[rgb(var(--color-accent))]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-[17px] font-semibold text-[rgb(var(--color-text-primary))] mb-1.5 tracking-tight">ITR-1</h3>
-                <p className="text-[14px] text-[rgb(var(--color-text-secondary))] leading-relaxed mb-3">
-                  For individuals with salary income, one house property, and other sources
-                </p>
-                <Link 
-                  to="/app/itr-1/salary" 
-                  className="text-[14px] text-[rgb(var(--color-accent))] hover:text-[rgb(var(--color-accent-hover))] font-medium inline-flex items-center gap-1 transition-colors"
-                >
-                  {hasITR1Calculation ? 'View filing' : 'Start filing'}
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-          </Card>
-
-          <Card padding="lg" hover>
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-[rgb(var(--color-accent-light))] rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-[rgb(var(--color-accent))]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-[17px] font-semibold text-[rgb(var(--color-text-primary))] mb-1.5 tracking-tight">ITR-2</h3>
-                <p className="text-[14px] text-[rgb(var(--color-text-secondary))] leading-relaxed mb-3">
-                  For individuals with capital gains from equity stocks and mutual funds
-                </p>
-                <Link 
-                  to="/app/itr-2/salary" 
-                  className="text-[14px] text-[rgb(var(--color-accent))] hover:text-[rgb(var(--color-accent-hover))] font-medium inline-flex items-center gap-1 transition-colors"
-                >
-                  {hasITR2Calculation ? 'View filing' : 'Start filing'}
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      {/* Confirmation Dialog */}
-      {showConfirmDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="max-w-md w-full">
-            <div className="p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-[rgb(var(--color-error-bg))] flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-[rgb(var(--color-error))]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-[17px] font-semibold text-[rgb(var(--color-text-primary))] mb-2">
-                    Clear {showConfirmDialog === 'itr1' ? 'ITR-1' : 'ITR-2'} Filing?
-                  </h3>
-                  <p className="text-[15px] text-[rgb(var(--color-text-secondary))] leading-relaxed">
-                    This will permanently delete all data including uploaded documents, calculations, and results. This action cannot be undone.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end">
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowConfirmDialog(null)}
-                >
-                  Cancel
-                </Button>
+              <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => handleClearFiling(showConfirmDialog)}
-                  className="px-5 py-2.5 bg-[rgb(var(--color-error))] text-white rounded-lg font-medium hover:bg-red-700 transition-all text-[15px]"
+                  onClick={() => answer(true)}
+                  className="py-3 rounded-xl border-2 border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-semibold text-[15px] hover:border-indigo-500 hover:bg-indigo-100 transition-all"
                 >
-                  Clear Filing
+                  {t('quiz.yes')}
+                </button>
+                <button
+                  onClick={() => answer(false)}
+                  className="py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold text-[15px] hover:border-gray-400 transition-all"
+                >
+                  {t('quiz.no')}
+                </button>
+              </div>
+            </>
+          ) : (
+            /* Result */
+            <div className="text-center py-2">
+              <div className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl ${
+                result === 'itr1'
+                  ? 'bg-emerald-100 dark:bg-emerald-900/40'
+                  : 'bg-violet-100 dark:bg-violet-900/40'
+              }`}>
+                {result === 'itr1' ? '✓' : '📊'}
+              </div>
+              <h3 className={`text-[20px] font-bold mb-2 ${
+                result === 'itr1'
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-violet-600 dark:text-violet-400'
+              }`}>
+                {t(`quiz.result_${result}`)}
+              </h3>
+              <p className="text-[14px] text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
+                {t(`quiz.result_${result}_reason`)}
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={retake}
+                  className="px-4 py-2 text-[14px] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                >
+                  {t('quiz.retake')}
+                </button>
+                <button
+                  onClick={() => {
+                    onClose();
+                    navigate(result === 'itr1' ? '/app/itr-1/salary' : '/app/itr-2/salary');
+                  }}
+                  className={`px-6 py-2.5 rounded-xl text-white font-semibold text-[14px] transition-all ${
+                    result === 'itr1'
+                      ? 'bg-emerald-600 hover:bg-emerald-700'
+                      : 'bg-violet-600 hover:bg-violet-700'
+                  }`}
+                >
+                  {result === 'itr1' ? t('itr1.cta') : t('itr2.cta')} →
                 </button>
               </div>
             </div>
-          </Card>
+          )}
         </div>
-      )}
+      </div>
+    </div>
+  );
+}
+
+// ─── ITR Card ─────────────────────────────────────────────────────────────────
+
+interface ITRCardProps {
+  type: 'itr1' | 'itr2';
+  hasCalc: boolean;
+  hasSalary: boolean;
+  calcResult: any;
+  lastCalcAt: string | null;
+}
+
+function ITRCard({ type, hasCalc, hasSalary, calcResult, lastCalcAt }: ITRCardProps) {
+  const { t } = useLang();
+  const isITR2 = type === 'itr2';
+
+  const totalTax = calcResult?.finalTaxSummary?.totalTaxLiability ?? 0;
+  const netPayable = calcResult?.netPayable ?? 0;
+  const isRefund = netPayable < 0;
+
+  const INR = (n: number) =>
+    '₹' + Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  const ctaLabel = hasCalc
+    ? t(`${type}.cta_view`)
+    : hasSalary
+    ? t(`${type}.cta_resume`)
+    : t(`${type}.cta`);
+
+  const urlType = type === 'itr1' ? 'itr-1' : 'itr-2';
+  const ctaLink = hasCalc
+    ? `/app/${urlType}/calculate`
+    : `/app/${urlType}/salary`;
+
+  return (
+    <div className={`relative rounded-2xl border-2 overflow-hidden shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${
+      isITR2
+        ? 'border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50 to-white dark:from-violet-950/30 dark:to-gray-900'
+        : 'border-indigo-200 dark:border-indigo-800 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/30 dark:to-gray-900'
+    }`}>
+      {/* FY badge */}
+      <div className={`absolute top-4 right-4 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${
+        isITR2
+          ? 'bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400'
+          : 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400'
+      }`}>
+        {t('common.fy')}
+      </div>
+
+      <div className="p-7">
+        {/* Title */}
+        <div className="mb-4">
+          <h2 className="text-[24px] font-bold text-gray-900 dark:text-white tracking-tight">
+            {t(`${type}.title`)}
+          </h2>
+          <p className={`text-[13px] font-semibold mt-0.5 ${isITR2 ? 'text-violet-500' : 'text-indigo-500'}`}>
+            {t(`${type}.tagline`)}
+          </p>
+        </div>
+
+        {/* Description */}
+        <p className="text-[14px] text-gray-500 dark:text-gray-400 leading-relaxed mb-5">
+          {t(`${type}.desc`)}
+        </p>
+
+        {/* Who should file */}
+        <div className="mb-5">
+          <p className="text-[12px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">
+            {t(`${type}.who`)}
+          </p>
+          <ul className="space-y-1.5">
+            {[1, 2, 3, 4].map(n => (
+              <li key={n} className="text-[13px] text-gray-600 dark:text-gray-300">
+                {t(`${type}.who${n}`)}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Calculation preview if exists */}
+        {hasCalc && calcResult && (
+          <div className="mb-5 p-4 bg-white/70 dark:bg-gray-800/70 rounded-xl border border-gray-100 dark:border-gray-700 space-y-2">
+            <div className="flex justify-between text-[13px]">
+              <span className="text-gray-500">
+                Last:{' '}
+                {lastCalcAt
+                  ? new Date(lastCalcAt).toLocaleDateString('en-IN', {
+                      day: 'numeric', month: 'short', year: 'numeric',
+                    })
+                  : '—'}
+              </span>
+              <span className="font-semibold text-gray-700 dark:text-gray-200">{INR(totalTax)}</span>
+            </div>
+            <div className={`text-[13px] font-semibold ${
+              isRefund ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'
+            }`}>
+              {isRefund
+                ? `${t('hist.refund')}: ${INR(Math.abs(netPayable))}`
+                : `${t('hist.payable')}: ${INR(netPayable)}`}
+            </div>
+            {isITR2 && (
+              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-gray-100 dark:border-gray-700">
+                {[
+                  { label: t('hist.salary'), val: calcResult.finalTaxSummary?.salaryPlusDebtMfTax ?? 0 },
+                  { label: t('hist.stock'),  val: calcResult.finalTaxSummary?.stockCapitalGainsTax ?? 0 },
+                  { label: t('hist.mf'),     val: calcResult.finalTaxSummary?.mutualFundEquityTax ?? 0 },
+                ].map(item => (
+                  <div key={item.label}>
+                    <p className="text-[10px] text-gray-400 leading-tight">{item.label}</p>
+                    <p className="text-[12px] font-semibold text-gray-700 dark:text-gray-200 tabular-nums">
+                      {INR(item.val)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* CTA Button */}
+        <Link
+          to={ctaLink}
+          className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[15px] text-white transition-all shadow-sm hover:shadow-md ${
+            isITR2 ? 'bg-violet-600 hover:bg-violet-700' : 'bg-indigo-600 hover:bg-indigo-700'
+          }`}
+        >
+          {ctaLabel} →
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Dashboard ───────────────────────────────────────────────────────────
+
+const Dashboard = () => {
+  const { t } = useLang();
+  const { itr1State, itr2State } = useITR();
+  const [showQuiz, setShowQuiz] = useState(false);
+
+  const hasITR1Calc   = itr1State.calculated && itr1State.calculationResult !== null;
+  const hasITR2Calc   = itr2State.calculated && itr2State.calculationResult !== null;
+  const hasITR1Salary = itr1State.salary.status === 'complete';
+  const hasITR2Salary = itr2State.salary.status === 'complete';
+
+  const COMPARISON_ROWS = [
+    { feature: 'Salary Income',               itr1: true,  itr2: true,  itr2note: '' },
+    { feature: 'Equity Stocks / MF Gains',    itr1: false, itr2: true,  itr2note: '' },
+    { feature: 'Multiple House Properties',   itr1: false, itr2: true,  itr2note: '' },
+    { feature: 'Income above ₹50 lakh',       itr1: false, itr2: true,  itr2note: '' },
+    { feature: 'Foreign Assets',              itr1: false, itr2: true,  itr2note: '' },
+    { feature: 'Business Income',             itr1: false, itr2: false, itr2note: 'ITR-3' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[rgb(var(--color-bg-secondary))] pt-20 pb-20">
+      <div className="max-w-5xl mx-auto px-6">
+
+        {/* Hero */}
+        <div className="text-center py-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full text-[12px] font-semibold mb-4 uppercase tracking-wide">
+            🇮🇳 {t('common.fy')} · New Tax Regime
+          </div>
+          <h1 className="text-[36px] md:text-[42px] font-bold text-gray-900 dark:text-white tracking-tight leading-tight mb-3">
+            {t('dash.title')}
+          </h1>
+          <p className="text-[16px] text-gray-500 dark:text-gray-400 max-w-xl mx-auto leading-relaxed mb-6">
+            {t('dash.subtitle')}
+          </p>
+          <button
+            onClick={() => setShowQuiz(true)}
+            className="inline-flex items-center gap-1.5 text-[14px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline transition-all"
+          >
+            {t('dash.not_sure')} <span>{t('dash.take_quiz')}</span>
+          </button>
+        </div>
+
+        {/* ITR Cards */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <ITRCard
+            type="itr1"
+            hasCalc={hasITR1Calc}
+            hasSalary={hasITR1Salary}
+            calcResult={itr1State.calculationResult}
+            lastCalcAt={itr1State.lastCalculatedAt}
+          />
+          <ITRCard
+            type="itr2"
+            hasCalc={hasITR2Calc}
+            hasSalary={hasITR2Salary}
+            calcResult={itr2State.calculationResult}
+            lastCalcAt={itr2State.lastCalculatedAt}
+          />
+        </div>
+
+        {/* Comparison table */}
+        <div className="mt-10 p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+          <p className="text-[12px] font-semibold text-gray-400 uppercase tracking-wide mb-5 text-center">
+            ITR-1 vs ITR-2 — Key Differences
+          </p>
+          <div className="grid grid-cols-3 gap-x-4 gap-y-3 text-[13px]">
+            {/* Header */}
+            <span />
+            <span className="text-center text-[11px] font-bold text-indigo-500 uppercase">ITR-1</span>
+            <span className="text-center text-[11px] font-bold text-violet-500 uppercase">ITR-2</span>
+
+            {COMPARISON_ROWS.map(row => (
+              <React.Fragment key={row.feature}>
+                <span className="text-gray-600 dark:text-gray-400 flex items-center">{row.feature}</span>
+                <span className={`text-center font-semibold ${row.itr1 ? 'text-emerald-500' : 'text-red-400'}`}>
+                  {row.itr1 ? '✓' : '✗'}
+                </span>
+                <span className={`text-center font-semibold ${
+                  row.itr2 ? 'text-emerald-500' : row.itr2note ? 'text-amber-500' : 'text-red-400'
+                }`}>
+                  {row.itr2 ? '✓' : row.itr2note ? `✗ (use ${row.itr2note})` : '✗'}
+                </span>
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        {/* History link */}
+        <div className="mt-6 text-center">
+          <Link
+            to="/app/history"
+            className="inline-flex items-center gap-2 text-[14px] text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            View calculation history →
+          </Link>
+        </div>
+      </div>
+
+      {showQuiz && <EligibilityQuiz onClose={() => setShowQuiz(false)} />}
     </div>
   );
 };
