@@ -6,7 +6,6 @@ import { useITR } from '../../../contexts/ITRContext';
 import { useLang } from '../../../contexts/LanguageContext';
 import { taxService } from '../../../services/tax.service';
 import { formatDateTime } from '../../../utils/formatters';
-import DownloadReportButton from '../../../components/pdf/DownloadReportButton';
 
 const ITR1Calculate = () => {
   const navigate = useNavigate();
@@ -119,7 +118,6 @@ const ITR1Calculate = () => {
             <Button onClick={handleCalculate} disabled={loading} variant="primary">{t('c1.update')}</Button>
           )}
           <Button onClick={handleCalculate} disabled={loading} variant="secondary">{t('c1.recalculate')}</Button>
-          <DownloadReportButton itrType="itr1" itr1State={itr1State} />
         </div>
       </div>
 

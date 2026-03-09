@@ -6,7 +6,6 @@ import { useITR } from '../../../contexts/ITRContext';
 import { useLang } from '../../../contexts/LanguageContext';
 import { taxService } from '../../../services/tax.service';
 import { formatDateTime } from '../../../utils/formatters';
-import DownloadReportButton from '../../../components/pdf/DownloadReportButton';
 
 const INR = (n: number, decimals = 2) =>
   '₹' + Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
@@ -199,12 +198,9 @@ const ITR2Calculate = () => {
             {t('c2.subtitle')} &nbsp;·&nbsp; {t('common.calculated_on')}: {itr2State.lastCalculatedAt ? formatDateTime(itr2State.lastCalculatedAt) : '—'}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={handleCalculate} disabled={loading} className="flex items-center gap-1.5 text-[13px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 font-medium border border-indigo-200 dark:border-indigo-800 rounded-lg px-3 py-1.5 transition-colors disabled:opacity-50">
-            {t('common.recalculate')}
-          </button>
-          <DownloadReportButton itrType="itr2" itr2State={itr2State} />
-        </div>
+        <button onClick={handleCalculate} disabled={loading} className="flex items-center gap-1.5 text-[13px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 font-medium border border-indigo-200 dark:border-indigo-800 rounded-lg px-3 py-1.5 transition-colors disabled:opacity-50">
+          {t('common.recalculate')}
+        </button>
       </div>
 
       {/* HERO GRID */}

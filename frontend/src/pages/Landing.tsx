@@ -88,6 +88,7 @@ export default function Landing() {
   const [scrollY, setScrollY] = useState(0);
   const [activeFeature, setActiveFeature] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [faqMounted, setFaqMounted] = useState(false);
   const [dark, setDark] = useState(() => window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false);
   const [lang, setLang] = useState<'en'|'hi'|'bn'|'or'|'ta'|'te'>('en');
   const [langOpen, setLangOpen] = useState(false);
@@ -129,6 +130,8 @@ export default function Landing() {
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
+
+  useEffect(() => { setFaqMounted(true); }, []);
 
   useEffect(() => {
     const t = setInterval(() => setActiveFeature(f => (f + 1) % FEATURES.length), 4500);
@@ -335,20 +338,20 @@ export default function Landing() {
       </nav>
 
             {/* ── HERO ── */}
-      <section style={{ paddingTop: 64, minHeight: "100vh", background: C.heroGrad, display: "flex", alignItems: "center", overflow: "hidden" }}>
-        <div className="container" style={{ padding: "64px 40px 72px" }}>
-          <div className="hero-g" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.85fr 1.05fr", gap: 40, alignItems: "center" }}>
+      <section style={{ paddingTop: 64, minHeight: "calc(100vh - 47px)", background: C.heroGrad, display: "flex", alignItems: "center", overflow: "hidden" }}>
+        <div className="container" style={{ padding: "36px 40px 36px" }}>
+          <div className="hero-g" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.8fr 1.0fr", gap: 28, alignItems: "center" }}>
 
             {/* LEFT — Copy */}
             <div>
 
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(36px,4vw,56px)", fontWeight: 800, lineHeight: 1.1, color: C.text, marginBottom: 20 }}>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px,3.2vw,46px)", fontWeight: 800, lineHeight: 1.1, color: C.text, marginBottom: 16 }}>
                 {tl('hero.h1a')}<br />{tl('hero.h1b')}<br /><span style={{ color: "#1d4ed8" }}>{tl('hero.h1c')}</span>
               </h1>
-              <p style={{ fontSize: 16, color: C.textSec, lineHeight: 1.78, marginBottom: 32, maxWidth: 420 }}>
+              <p style={{ fontSize: 15, color: C.textSec, lineHeight: 1.72, marginBottom: 24, maxWidth: 420 }}>
                 {tl('hero.desc')}
               </p>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 36 }}>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
                 <a href="/app/dashboard" className="btn-primary" style={{ fontSize: 15, padding: "14px 28px" }}>{tl('hero.cta1')}</a>
                 <a href="#compare" className="btn-outline" style={{ fontSize: 15, padding: "14px 28px", color: C.accent, borderColor: dark ? "#3b5bdb" : "#bfdbfe", background: "transparent" }}>{tl('hero.cta2')}</a>
               </div>
@@ -365,18 +368,18 @@ export default function Landing() {
             {/* CENTRE — Professional photo */}
             <div style={{ position: "relative", display: "flex", justifyContent: "center", alignItems: "flex-end" }}>
               {/* Background shape behind photo */}
-              <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", width: 260, height: 340, background: "linear-gradient(180deg, #dbeafe 0%, #e0e7ff 100%)", borderRadius: "50% 50% 0 0", zIndex: 0 }} />
+              <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", width: 230, height: 290, background: "linear-gradient(180deg, #dbeafe 0%, #e0e7ff 100%)", borderRadius: "50% 50% 0 0", zIndex: 0 }} />
               <img
                 src="https://www.thestatesman.com/wp-content/uploads/2022/09/03_Merged.jpg"
                 alt="Professional in business attire"
-                style={{ position: "relative", zIndex: 1, width: 240, height: 340, objectFit: "cover", objectPosition: "top center", borderRadius: "50% 50% 0 0", display: "block" }}
+                style={{ position: "relative", zIndex: 1, width: 210, height: 290, objectFit: "cover", objectPosition: "top center", borderRadius: "50% 50% 0 0", display: "block" }}
               />
 
             </div>
 
             {/* RIGHT — Tax card */}
             <div style={{ position: "relative" }}>
-              <div style={{ background: C.bgCard, borderRadius: 18, padding: 24, boxShadow: dark ? "0 20px 56px rgba(0,0,0,0.4)" : "0 20px 56px rgba(0,0,0,0.1)", border: `1px solid ${C.border}` }}>
+              <div style={{ background: C.bgCard, borderRadius: 18, padding: 18, boxShadow: dark ? "0 20px 56px rgba(0,0,0,0.4)" : "0 20px 56px rgba(0,0,0,0.1)", border: `1px solid ${C.border}` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
                   <p style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.08em" }}>Total Tax Liability · FY 2024-25</p>
                   <span style={{ fontSize: 10, background: "#fef3c7", color: "#92400e", fontWeight: 700, padding: "3px 7px", borderRadius: 4, letterSpacing: "0.05em" }}>NEW REGIME</span>
@@ -435,10 +438,10 @@ export default function Landing() {
         <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", alignItems: "center", overflow: "hidden" }}>
           <style>{`
             @keyframes mib-scroll {
-              0%   { transform: translateX(100vw); }
-              100% { transform: translateX(-100%); }
+              0%   { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
             }
-            .mib-track { display: flex; align-items: center; gap: 48px; animation: mib-scroll 22s linear infinite; white-space: nowrap; padding-left: 100vw; }
+            .mib-track { display: flex; align-items: center; gap: 48px; animation: mib-scroll 16s linear infinite; white-space: nowrap; padding-left: 30vw; }
             .mib-track:hover { animation-play-state: paused; }
           `}</style>
           <div className="mib-track">
@@ -726,7 +729,7 @@ export default function Landing() {
                       <path d="M6 9l6 6 6-6" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </button>
-                  {openFaq === i && <p className="faq-ans" style={{ color: C.textSec }}>{faq.a}</p>}
+                  {faqMounted && openFaq === i && <p className="faq-ans" style={{ color: C.textSec }}>{faq.a}</p>}
                 </div>
               ))}
             </div>

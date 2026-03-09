@@ -43,7 +43,7 @@ export const ITR2Salary = () => {
   const { t } = useLang();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const handleForm16Upload = async (file: File) => {
     setLoading(true);
@@ -191,10 +191,7 @@ export const ITR2Salary = () => {
                     className="w-full text-left px-4 py-3 flex justify-between items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug">{faq.q}</span>
-                    <span
-                      className="text-gray-400 dark:text-gray-500 flex-shrink-0 mt-0.5 text-base leading-none"
-                      style={{ transform: openFaq === i ? 'rotate(45deg)' : 'none', display: 'inline-block', transition: 'transform 0.2s' }}
-                    >+</span>
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" style={{ transform: openFaq === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }}><path d="M6 9l6 6 6-6" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </button>
                   {openFaq === i && (
                     <div className="px-4 pb-4">

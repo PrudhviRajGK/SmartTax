@@ -9,7 +9,7 @@ import type {
 function makeId() { return Math.random().toString(36).slice(2, 9); }
 
 function makeDefaultInput(index: number): HousePropertyInput {
-  return { id: makeId(), label: `Property ${index + 1}`, property_type: 'SOP', gross_rent_received: 0, expected_market_rent: 0, municipal_taxes_paid: 0, home_loan_interest: 0 };
+  return { id: makeId(), label: `Property ${index + 1}`, property_type: 'SOP', gross_rent_received: 0, expected_market_rent: 0, municipal_taxes_paid: 0, home_loan_interest: 0, unrealized_rent: 0, vacancy_loss: 0, pre_construction_interest: 0 };
 }
 
 const fmt = (n: number) => '₹' + Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
@@ -169,6 +169,14 @@ export default function HouseProperty() {
                 </div>
               )}
 
+              {/* Optional ITR portal fields (informational — do not affect New Regime computation) */}
+              {isRented && (
+                <AdvancedFields
+                  input={input}
+                  onUpdate={(field, val) => updateInput(input.id, field as keyof HousePropertyInput, val)}
+                />
+              )}
+
               {/* Preview button */}
               <button
                 onClick={async () => {
@@ -248,6 +256,65 @@ export default function HouseProperty() {
           {anyLoading ? t('hp.calculating') : t('hp.calc_continue')}
         </button>
       </div>
+    </div>
+  );
+}
+
+function AdvancedFields({ input, onUpdate }: { input: any; onUpdate: (field: string, val: number) => void }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 overflow-hidden">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+      >
+        <span className="flex items-center gap-2">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8"/><path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+          Additional ITR portal fields (optional)
+        </span>
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      {open && (
+        <div className="px-4 pb-4 pt-1 space-y-4 bg-gray-50/50 dark:bg-gray-900/20">
+          <p className="text-[11px] text-gray-400 dark:text-gray-500 leading-relaxed bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg px-3 py-2">
+            These fields are required on the Income Tax portal but do <strong>not</strong> change your tax under the New Tax Regime. Enter them for record-keeping or if you plan to file manually on the portal.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <NumberField
+              label="Unrealized Rent Recovered"
+              value={input.unrealized_rent ?? 0}
+              onChange={v => onUpdate('unrealized_rent', v)}
+              hint="Rent arrears received this year from a previous tenant (added to GAV)"
+            />
+            <NumberField
+              label="Vacancy Loss (Annual)"
+              value={input.vacancy_loss ?? 0}
+              onChange={v => onUpdate('vacancy_loss', v)}
+              hint="Number of months the property was vacant × monthly expected rent"
+            />
+            <div className="md:col-span-2">
+              <NumberField
+                label="Pre-construction Interest (Annual instalment)"
+                value={input.pre_construction_interest ?? 0}
+                onChange={v => onUpdate('pre_construction_interest', v)}
+                hint="Total pre-construction period interest ÷ 5, deductible over 5 years under Sec 24(b). Only applicable for Let-Out / Deemed Let-Out."
+              />
+            </div>
+          </div>
+          <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3 text-[12px] text-gray-500 dark:text-gray-400 space-y-1">
+            <p className="font-semibold text-gray-600 dark:text-gray-300 mb-1.5">Interest limit logic (New Regime)</p>
+            <p>Self-Occupied → No deduction (NAV = ₹0, Sec 24b not available)</p>
+            <p>Let Out / Deemed Let Out → Full interest deductible, no cap</p>
+            <p className="text-[11px] text-gray-400 mt-1 italic">Note: Under Old Regime, SOP Sec 24b cap was ₹2,00,000. Under New Regime, no deduction is available for SOP.</p>
+          </div>
+          <p className="text-[11px] text-amber-600 dark:text-amber-400 flex items-start gap-1.5">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" className="flex-shrink-0 mt-0.5"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Multiple property aggregation: SmartTax sums all property incomes and losses. HP losses cannot be set off against salary under New Regime — only carried forward 8 years intra-head.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
