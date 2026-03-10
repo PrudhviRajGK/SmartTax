@@ -237,13 +237,30 @@ export default function Landing() {
       }}>
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 34, height: 34, background: "linear-gradient(135deg,#1d4ed8,#4f46e5)", borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <rect x="4" y="3" width="16" height="18" rx="2" stroke="white" strokeWidth="2"/>
-              <path d="M9 14l2 2 4-4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: C.text }}>SmartTax</span>
+          <svg width="36" height="36" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="nb-bg" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#1e3a8a"/>
+                <stop offset="100%" stopColor="#2563eb"/>
+              </linearGradient>
+              <linearGradient id="nb-sh" x1="0" y1="0" x2="0" y2="56" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="white" stopOpacity="0.14"/>
+                <stop offset="55%" stopColor="white" stopOpacity="0"/>
+              </linearGradient>
+            </defs>
+            <rect width="56" height="56" rx="13" fill="url(#nb-bg)"/>
+            <rect width="56" height="56" rx="13" fill="url(#nb-sh)"/>
+            <g stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3">
+              <line x1="13" y1="13" x2="37" y2="13"/>
+              <line x1="13" y1="20" x2="34" y2="20"/>
+              <line x1="20" y1="13" x2="20" y2="44"/>
+              <line x1="13" y1="20" x2="36" y2="44"/>
+            </g>
+            <circle cx="43" cy="43" r="9" fill="white"/>
+            <circle cx="43" cy="43" r="7.2" fill="#2e7d32"/>
+            <polyline points="39.2,43.1 42.0,45.8 46.8,40.2" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          </svg>
+          <span style={{ fontFamily: "'Montserrat','DM Sans',sans-serif", fontSize: 18, fontWeight: 800, letterSpacing: "-0.3px", color: "#1e3a8a" }}>SMART<span style={{ fontWeight: 400, color: "#2563eb" }}>tax</span></span>
         </div>
 
         {/* Nav links */}
@@ -761,8 +778,30 @@ export default function Landing() {
                 <div style={{ position: "absolute", width: 180, height: 180, border: "1.5px dashed #eff6ff", borderRadius: "50%" }} />
 
                 {/* Centre logo — stays fixed */}
-                <div style={{ position: "relative", zIndex: 10, width: 70, height: 70, background: "linear-gradient(135deg,#1d4ed8,#4f46e5)", borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 28px rgba(29,78,216,0.35)" }}>
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="white" strokeWidth="2"/><path d="M9 14l2 2 4-4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <div style={{ position: "relative", zIndex: 10, width: 78, height: 78, borderRadius: 20, boxShadow: "0 12px 36px rgba(30,58,138,0.38)" }}>
+                  <svg width="78" height="78" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="orb-bg" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="#1e3a8a"/>
+                        <stop offset="100%" stopColor="#2563eb"/>
+                      </linearGradient>
+                      <linearGradient id="orb-sh" x1="0" y1="0" x2="0" y2="56" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stopColor="white" stopOpacity="0.14"/>
+                        <stop offset="55%" stopColor="white" stopOpacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <rect width="56" height="56" rx="13" fill="url(#orb-bg)"/>
+                    <rect width="56" height="56" rx="13" fill="url(#orb-sh)"/>
+                    <g stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3">
+                      <line x1="13" y1="13" x2="37" y2="13"/>
+                      <line x1="13" y1="20" x2="34" y2="20"/>
+                      <line x1="20" y1="13" x2="20" y2="44"/>
+                      <line x1="13" y1="20" x2="36" y2="44"/>
+                    </g>
+                    <circle cx="43" cy="43" r="9" fill="white"/>
+                    <circle cx="43" cy="43" r="7.2" fill="#2e7d32"/>
+                    <polyline points="39.2,43.1 42.0,45.8 46.8,40.2" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                  </svg>
                 </div>
 
                 {/* 4 orbiting avatars — each starts at top, staggered by delay */}
@@ -858,10 +897,30 @@ export default function Landing() {
           <div className="footer-g" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 48 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-                <div style={{ width: 34, height: 34, background: "linear-gradient(135deg,#1d4ed8,#4f46e5)", borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke="white" strokeWidth="2"/><path d="M9 14l2 2 4-4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </div>
-                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, color: "white" }}>SmartTax</span>
+                <svg width="36" height="36" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="ft-bg" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#2563eb"/>
+                      <stop offset="100%" stopColor="#5c6bc0"/>
+                    </linearGradient>
+                    <linearGradient id="ft-sh" x1="0" y1="0" x2="0" y2="56" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="white" stopOpacity="0.16"/>
+                      <stop offset="55%" stopColor="white" stopOpacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <rect width="56" height="56" rx="13" fill="url(#ft-bg)"/>
+                  <rect width="56" height="56" rx="13" fill="url(#ft-sh)"/>
+                  <g stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3">
+                    <line x1="13" y1="13" x2="37" y2="13"/>
+                    <line x1="13" y1="20" x2="34" y2="20"/>
+                    <line x1="20" y1="13" x2="20" y2="44"/>
+                    <line x1="13" y1="20" x2="36" y2="44"/>
+                  </g>
+                  <circle cx="43" cy="43" r="9" fill="rgba(15,23,42,0.7)"/>
+                  <circle cx="43" cy="43" r="7.2" fill="#4caf50"/>
+                  <polyline points="39.2,43.1 42.0,45.8 46.8,40.2" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                </svg>
+                <span style={{ fontFamily: "'Montserrat','DM Sans',sans-serif", fontSize: 18, fontWeight: 800, letterSpacing: "-0.3px", color: "white" }}>SMART<span style={{ fontWeight: 400, color: "#60a5fa" }}>tax</span></span>
               </div>
               <p style={{ fontSize: 13, color: "#475569", lineHeight: 1.75, maxWidth: 280, marginBottom: 22 }}>
                 Automated ITR-1 and ITR-2 computation for Indian salaried professionals and investors. New Tax Regime · FY 2024-25.

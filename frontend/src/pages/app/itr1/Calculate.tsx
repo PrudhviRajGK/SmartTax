@@ -7,6 +7,7 @@ import { useLang } from '../../../contexts/LanguageContext';
 import { taxService } from '../../../services/tax.service';
 import { formatDateTime } from '../../../utils/formatters';
 import DownloadReportButton from '../../../components/pdf/DownloadReportButton';
+import InterestTile from '../../../components/tax/InterestTile';
 
 const ITR1Calculate = () => {
   const navigate = useNavigate();
@@ -153,6 +154,9 @@ const ITR1Calculate = () => {
           </p>
         </Card>
       )}
+
+      {/* 234B/234C interest — shown only when balance tax > ₹10,000 */}
+      <InterestTile totalTax={totalTaxLiability} tds={itr1State.salary.data?.tds_paid || itr1State.salary.data?.deductions || 0} />
 
       <div className="flex justify-between pt-4">
         <Button variant="secondary" onClick={() => navigate('/app/itr-1/review')}>{t('c1.back_review')}</Button>

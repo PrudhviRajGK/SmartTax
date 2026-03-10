@@ -7,6 +7,7 @@ import { useLang } from '../../../contexts/LanguageContext';
 import { taxService } from '../../../services/tax.service';
 import { formatDateTime } from '../../../utils/formatters';
 import DownloadReportButton from '../../../components/pdf/DownloadReportButton';
+import InterestTile from '../../../components/tax/InterestTile';
 
 const INR = (n: number, decimals = 2) =>
   '₹' + Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
@@ -458,6 +459,9 @@ const ITR2Calculate = () => {
       </div>
 
       {/* NAV */}
+      {/* 234B/234C interest — shown only when balance tax > ₹10,000 */}
+      <InterestTile totalTax={totalTax} tds={tdsPaid} />
+
       <div className="flex items-center justify-between pt-4">
         <Button variant="secondary" onClick={() => navigate('/app/itr-2/review')}>{t('c2.back_review')}</Button>
         <div className="flex gap-2 flex-wrap justify-end">
