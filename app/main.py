@@ -84,11 +84,14 @@ class ChatbotRequest(BaseModel):
     user_context: Optional[dict] = None
 
 class HousePropertyRequest(BaseModel):
-    property_type: str = "SOP"           # "SOP" | "LOP" | "DLOP"
+    property_type: str = "SOP"                      # "SOP" | "LOP" | "DLOP"
     gross_rent_received: Optional[float] = 0.0
     expected_market_rent: Optional[float] = 0.0
     municipal_taxes_paid: Optional[float] = 0.0
     home_loan_interest: Optional[float] = 0.0
+    vacancy_loss: Optional[float] = 0.0             # Sec 23(1)(c)
+    unrealized_rent: Optional[float] = 0.0          # Sec 25A
+    pre_construction_interest: Optional[float] = 0.0
 
 @app.get("/")
 def read_root():
@@ -234,6 +237,9 @@ def calculate_house_property(request: HousePropertyRequest):
             expected_market_rent=request.expected_market_rent,
             municipal_taxes_paid=request.municipal_taxes_paid,
             home_loan_interest=request.home_loan_interest,
+            vacancy_loss=request.vacancy_loss or 0.0,
+            unrealized_rent=request.unrealized_rent or 0.0,
+            pre_construction_interest=request.pre_construction_interest or 0.0,
         )
         return {"success": True, "data": result}
     except Exception as e:

@@ -507,7 +507,8 @@ const ITR2Report = ({ state }: { state: any }) => {
   const debtLtcg      = r.debtMutualFunds?.debtLtcg ?? 0;
 
   const hasEquity     = stcgBefore + stcgAfter + ltcgBefore + ltcgAfter > 0;
-  const hasMF         = eqStcg + eqLtcg + debtStcg + debtLtcg > 0;
+  const hasMF         = eqStcg + eqLtcg > 0;          // equity MF only — triggers CG page
+  const hasDebtMFNote = debtStcg + debtLtcg > 0;      // debt MF shown in salary section
   const hasHP         = hpProperties.length > 0;
 
   const totalGross    = taxableIncome + stcgBefore + stcgAfter + ltcgBefore + ltcgAfter + eqStcg + eqLtcg + debtStcg + debtLtcg;
@@ -558,6 +559,7 @@ const ITR2Report = ({ state }: { state: any }) => {
             ['Salary + Debt MF (slab)',    INR(taxableIncome), INR(salaryTax)],
             hasEquity ? ['Equity Stock Capital Gains', INR(stcgBefore + stcgAfter + ltcgBefore + ltcgAfter), INR(stockTax)] : null,
             hasMF     ? ['Equity Mutual Funds',         INR(eqStcg + eqLtcg),    INR(equityMfTax)] : null,
+            hasDebtMFNote ? ['Debt MF (added to salary slab)',  INR(debtStcg + debtLtcg), 'at slab'] : null,
           ].filter(Boolean).map(([label, amt, tax], i, arr) => (
             <View key={String(label)} style={[S.tableRow, i % 2 !== 0 ? S.tableRowAlt : {}, i === arr.length - 1 ? S.tableRowLast : {}]}>
               <Text style={[S.tableCell, { flex: 1 }]}>{label as string}</Text>
@@ -589,23 +591,26 @@ const ITR2Report = ({ state }: { state: any }) => {
 
         <View style={S.slabBox}>
           <Text style={S.slabTitle}>New Regime Tax Slabs — FY 2024–25</Text>
-          {[
-            ['Up to Rs.4,00,000',           '0%'],
-            ['Rs.4,00,001 – Rs.8,00,000',    '5%'],
-            ['Rs.8,00,001 – Rs.12,00,000',   '10%'],
-            ['Rs.12,00,001 – Rs.16,00,000',  '15%'],
-            ['Rs.16,00,001 – Rs.20,00,000',  '20%'],
-            ['Rs.20,00,001 – Rs.24,00,000',  '25%'],
-            ['Above Rs.24,00,000',          '30%'],
-          ].map(([range, rate]) => (
-            <View key={range} style={S.slabRow}>
-              <Text style={S.slabRange}>{range}</Text>
-              <Text style={S.slabRate}>{rate}</Text>
-            </View>
-          ))}
+          {/* 2-column compact grid — half the height of the vertical list */}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+            {[
+              ['Up to Rs.4,00,000',          '0%'],
+              ['Rs.4,00,001 – Rs.8,00,000',  '5%'],
+              ['Rs.8,00,001 – Rs.12,00,000', '10%'],
+              ['Rs.12,00,001 – Rs.16,00,000','15%'],
+              ['Rs.16,00,001 – Rs.20,00,000','20%'],
+              ['Rs.20,00,001 – Rs.24,00,000','25%'],
+              ['Above Rs.24,00,000',         '30%'],
+            ].map(([range, rate], i) => (
+              <View key={range} style={{ width: '50%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 8, paddingVertical: 2.5, backgroundColor: i % 2 === 0 ? 'white' : '#f8faff' }}>
+                <Text style={[S.slabRange, { fontSize: 7.5 }]}>{range}</Text>
+                <Text style={[S.slabRate,  { fontSize: 7.5 }]}>{rate}</Text>
+              </View>
+            ))}
+          </View>
           {taxableIncome <= 1_200_000 && (
             <View style={S.rebateBadge}>
-              <Text style={S.rebateText}>✓ Section 87A Rebate — taxable income ≤ Rs.12,00,000 · Full tax waived</Text>
+              <Text style={S.rebateText}>v Section 87A Rebate — taxable income Rs.12,00,000 or below · Full tax waived</Text>
             </View>
           )}
         </View>
@@ -700,8 +705,8 @@ const ITR2Report = ({ state }: { state: any }) => {
                     </View>
                   </>
                 )}
-                {/* Debt MF */}
-                {(debtStcg + debtLtcg) > 0 && (
+                {/* Debt MF — shown here only if equity MF page is rendered */}
+                {hasDebtMFNote && (
                   <View style={S.tableRow}>
                     <Text style={[S.tableCell, { flex: 1 }]}>Debt MF STCG + LTCG (added to income → slab)</Text>
                     <Text style={[S.tableCell, S.tableCellRight, { width: 80 }]}>{INR(debtStcg + debtLtcg)}</Text>

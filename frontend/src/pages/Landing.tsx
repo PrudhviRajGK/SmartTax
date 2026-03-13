@@ -808,7 +808,7 @@ export default function Landing() {
                 {[
                   { name: "Manya Singh", initials: "MS", color: "#1d4ed8", bg: "#eff6ff" },
                   { name: "Ansh Raj",    initials: "AR", color: "#7c3aed", bg: "#f5f3ff" },
-                  { name: "Priyanshu",   initials: "PS", color: "#0369a1", bg: "#e0f2fe" },
+                  { name: "Priyanshu",   initials: "PK$", color: "#0369a1", bg: "#e0f2fe" },
                   { name: "GK",          initials: "GK", color: "#16a34a", bg: "#f0fdf4" },
                 ].map((m, i) => (
                   <div key={m.name} className={`orbit-avatar-${i}`} style={{ position: "absolute", top: "50%", left: "50%", marginTop: -28, marginLeft: -28 }}>
@@ -830,7 +830,7 @@ export default function Landing() {
                 {[
                   { initials: "MS", name: "Manya Singh", role: "Product & Frontend", color: "#1d4ed8", bg: "#eff6ff" },
                   { initials: "AR", name: "Ansh Raj", role: "Backend & API", color: "#7c3aed", bg: "#f5f3ff" },
-                  { initials: "PS", name: "Priyanshu Sahu", role: "Tax Logic & Rules", color: "#0369a1", bg: "#e0f2fe" },
+                  { initials: "PKS", name: "Priyanshu Sahu", role: "Tax Logic & Rules", color: "#0369a1", bg: "#e0f2fe" },
                   { initials: "GK", name: "GK", role: "Infrastructure & Data", color: "#16a34a", bg: "#f0fdf4" },
                 ].map(m => (
                   <div key={m.name} style={{ display: "flex", gap: 12, alignItems: "center", padding: "14px 16px", background: "#f8fafc", borderRadius: 12, border: "1px solid #e2e8f0" }}>

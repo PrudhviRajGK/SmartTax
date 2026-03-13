@@ -135,7 +135,7 @@ function HistoryCard({ type, calcResult, lastCalcAt, onDelete }: HistoryCardProp
               onClick={() => setConfirmDelete(false)}
               className="px-4 py-1.5 text-[13px] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 transition-colors"
             >
-              {t('hist.cancel')}
+              {t('Cancel')}
             </button>
             <button
               onClick={onDelete}

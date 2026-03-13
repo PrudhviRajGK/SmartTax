@@ -57,7 +57,16 @@ export default function HouseProperty() {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/calculate/house-property`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ property_type: entry.input.property_type, gross_rent_received: entry.input.gross_rent_received, expected_market_rent: entry.input.expected_market_rent, municipal_taxes_paid: entry.input.municipal_taxes_paid, home_loan_interest: entry.input.home_loan_interest }),
+        body: JSON.stringify({
+          property_type:        entry.input.property_type,
+          gross_rent_received:  entry.input.gross_rent_received,
+          expected_market_rent: entry.input.expected_market_rent,
+          municipal_taxes_paid: entry.input.municipal_taxes_paid,
+          home_loan_interest:   entry.input.home_loan_interest,
+          vacancy_loss:         entry.input.vacancy_loss         ?? 0,
+          unrealized_rent:      entry.input.unrealized_rent      ?? 0,
+          pre_construction_interest: entry.input.pre_construction_interest ?? 0,
+        }),
       });
       const json = await res.json();
       if (!json.success) throw new Error('Calculation failed');
