@@ -42,8 +42,6 @@ const ITR2MutualFunds = () => {
       {error && (
         <ErrorAlert message={error} onDismiss={() => setError('')} />
       )}
-        </Card>
-      )}
 
       <Card>
         <FileUpload

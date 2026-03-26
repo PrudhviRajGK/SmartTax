@@ -83,8 +83,6 @@ export const ITR2Salary = () => {
       {error && (
         <ErrorAlert message={error} onDismiss={() => setError('')} />
       )}
-        </div>
-      )}
 
       {/* ITR-2 step progress strip */}
       <div className="flex items-center gap-0 overflow-x-auto">

@@ -80,8 +80,6 @@ const ITR1Salary = () => {
       {error && (
         <ErrorAlert message={error} onDismiss={() => setError('')} />
       )}
-        </div>
-      )}
 
       {/* Two-column layout: upload left, FAQ right */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
