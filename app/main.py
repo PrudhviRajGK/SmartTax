@@ -39,6 +39,7 @@ from datetime import datetime
 
 from app.form16_parser import Form16Parser
 from app.groww_parser import GrowwCapitalGainsParser
+from app.zerodha_parser import ZerodhaCapitalGainsParser
 from app.mutual_fund_parser import MutualFundCapitalGainsParser
 from app.chatbot import TaxAdvisorChatbot
 from app import utils
@@ -57,6 +58,7 @@ app.add_middleware(
 # Initialize parsers and chatbot
 form16_parser = Form16Parser()
 groww_parser = GrowwCapitalGainsParser()
+zerodha_parser = ZerodhaCapitalGainsParser()
 mf_parser = MutualFundCapitalGainsParser()
 chatbot = TaxAdvisorChatbot()
 
@@ -103,7 +105,7 @@ async def parse_form16(file: UploadFile = File(...)):
     """Parse Form-16 PDF and extract salary and TDS information"""
     try:
         if not file.filename.endswith('.pdf'):
-            raise HTTPException(status_code=400, detail="Only PDF files are supported")
+            raise HTTPException(status_code=400, detail="Only PDF files are supported for Form-16. Please upload a .pdf file.")
         
         contents = await file.read()
         pdf_file = io.BytesIO(contents)
@@ -120,6 +122,8 @@ async def parse_form16(file: UploadFile = File(...)):
                 "tds_paid": result.get("tds_paid", 0.0)
             }
         }
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error parsing Form-16: {str(e)}")
 
@@ -152,24 +156,21 @@ async def parse_equity(file: UploadFile = File(...), broker: str = Form("groww")
         HTTPException: 400 if file type invalid, 500 if parsing fails
         
     Notes:
-        - Zerodha parser not yet implemented (uses Groww parser as fallback)
         - Date-based split is critical for correct tax calculation
     """
     try:
         if not file.filename.endswith(('.xlsx', '.xls')):
             raise HTTPException(
                 status_code=400, 
-                detail="Only Excel files (.xlsx, .xls) are supported"
+                detail="Only Excel files (.xlsx, .xls) are supported for equity reports. Please upload a valid Excel file."
             )
         
         contents = await file.read()
         excel_file = io.BytesIO(contents)
         
-        # Note: Zerodha parser not yet implemented
-        # Both brokers currently use Groww parser logic
+        # Select parser based on broker
         if broker.lower() == "zerodha":
-            # Future: Implement Zerodha-specific parser
-            result = groww_parser.parse(excel_file)
+            result = zerodha_parser.parse(excel_file)
         else:
             result = groww_parser.parse(excel_file)
         
@@ -187,6 +188,8 @@ async def parse_equity(file: UploadFile = File(...), broker: str = Form("groww")
         }
     except HTTPException:
         raise
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(
             status_code=500, 
@@ -205,7 +208,7 @@ async def parse_mutual_fund(file: UploadFile = File(...)):
     """Parse Mutual Fund capital gains Excel report"""
     try:
         if not file.filename.endswith(('.xlsx', '.xls')):
-            raise HTTPException(status_code=400, detail="Only Excel files are supported")
+            raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are supported for mutual fund reports. Please upload a valid Excel file.")
         
         contents = await file.read()
         excel_file = io.BytesIO(contents)
@@ -223,6 +226,8 @@ async def parse_mutual_fund(file: UploadFile = File(...)):
                 "debt_ltcg": result.get("debt_ltcg", 0.0)
             }
         }
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error parsing MF report: {str(e)}")
 
