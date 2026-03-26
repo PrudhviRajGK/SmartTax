@@ -28,13 +28,20 @@ class GrowwCapitalGainsParser:
     """
 
     def parse(self, file):
-        df = pd.read_excel(file, header=None)
+        try:
+            df = pd.read_excel(file, header=None)
+        except Exception as e:
+            raise ValueError("Unable to read the uploaded file. Please ensure it's a valid Excel file (.xlsx or .xls).")
+
+        if df.empty or len(df) < 5:
+            raise ValueError("The uploaded file appears to be empty or invalid. Please upload a valid Groww equity trades report.")
 
         stcg_before = stcg_after = 0.0
         ltcg_before = ltcg_after = 0.0
 
         mode = None
         headers = None
+        found_valid_section = False
 
         for i in range(len(df)):
             row = df.iloc[i]
@@ -44,12 +51,14 @@ class GrowwCapitalGainsParser:
             if "short term trades" in first_cell:
                 mode = "STCG"
                 headers = None
+                found_valid_section = True
                 continue
 
             # ---------------- Detect LTCG section ----------------
             if "long term trades" in first_cell:
                 mode = "LTCG"
                 headers = None
+                found_valid_section = True
                 continue
 
             # ---------------- Detect header row ----------------
@@ -98,6 +107,9 @@ class GrowwCapitalGainsParser:
                         ltcg_before += pnl
                     else:
                         ltcg_after += pnl
+
+        if not found_valid_section:
+            raise ValueError("This doesn't appear to be a valid Groww equity trades report. Please ensure you've uploaded the correct file with 'Short Term Trades' or 'Long Term Trades' sections.")
 
         return {
             "stcg_before": round(stcg_before, 2),

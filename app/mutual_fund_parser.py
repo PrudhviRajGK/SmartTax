@@ -8,7 +8,13 @@ class MutualFundCapitalGainsParser:
     """
 
     def parse(self, file):
-        df = pd.read_excel(file, header=None)
+        try:
+            df = pd.read_excel(file, header=None)
+        except Exception as e:
+            raise ValueError("Unable to read the uploaded file. Please ensure it's a valid Excel file (.xlsx or .xls).")
+
+        if df.empty or len(df) < 5:
+            raise ValueError("The uploaded file appears to be empty or invalid. Please upload a valid mutual fund capital gains report.")
 
         result = {
             "equity_stcg": 0.0,
@@ -30,11 +36,12 @@ class MutualFundCapitalGainsParser:
 
         if header_row_index is None:
             # Header not found → return zeros safely
-            return result
+            raise ValueError("This doesn't appear to be a valid mutual fund capital gains report. Please ensure you've uploaded the correct file with 'Asset Class / Category' column.")
 
         # --------------------------------------------------
         # 2. Parse rows BELOW header (actual data rows)
         # --------------------------------------------------
+        found_data = False
         for _, row in df.iloc[header_row_index + 1:].iterrows():
             label = str(row[2]).strip().lower()  # Column C
 
@@ -49,11 +56,16 @@ class MutualFundCapitalGainsParser:
             if label == "equity":
                 result["equity_stcg"] += stcg
                 result["equity_ltcg"] += ltcg
+                found_data = True
 
             # ---------------- DEBT ----------------
             elif "debt" in label:
                 result["debt_stcg"] += stcg
                 result["debt_ltcg"] += ltcg
+                found_data = True
+
+        if not found_data:
+            raise ValueError("No valid mutual fund data found in the uploaded file. Please ensure you've uploaded a complete capital gains report.")
 
         return result
 

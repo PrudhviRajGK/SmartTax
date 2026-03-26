@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { FileUpload } from '../../../components/ui/FileUpload';
+import { ErrorAlert } from '../../../components/ui/ErrorAlert';
 import { useITR } from '../../../contexts/ITRContext';
 import { useLang } from '../../../contexts/LanguageContext';
 import { taxService } from '../../../services/tax.service';
@@ -39,8 +40,8 @@ const ITR2MutualFunds = () => {
       </div>
 
       {error && (
-        <Card className="bg-[rgb(var(--color-error-bg))] border-[rgb(var(--color-error))]">
-          <p className="text-[15px] text-[rgb(var(--color-error))]">{error}</p>
+        <ErrorAlert message={error} onDismiss={() => setError('')} />
+      )}
         </Card>
       )}
 

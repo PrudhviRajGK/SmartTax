@@ -123,9 +123,15 @@ class Form16Parser:
         
         try:
             with pdfplumber.open(pdf_file) as pdf:
+                if len(pdf.pages) == 0:
+                    raise ValueError("The uploaded PDF file is empty. Please upload a valid Form-16 document.")
+                
                 # --- 1. Employer Name ---
                 try:
                     page1_text = pdf.pages[0].extract_text()
+                    if not page1_text or len(page1_text.strip()) < 10:
+                        raise ValueError("Unable to extract text from the PDF. The file may be corrupted or not a valid Form-16.")
+                    
                     match = re.search(r"(?i)employer[:\s\n]+([A-Za-z0-9\s\.]+)", page1_text)
                     if match:
                         name_candidate = match.group(1).split('\n')[0].strip()
@@ -149,20 +155,29 @@ class Form16Parser:
                     if text_data.get("gross_salary", 0) > 0:
                         result.update(text_data)
 
+        except ValueError:
+            raise
         except Exception as e:
-            print(f"Error reading PDF: {e}")
+            raise ValueError(f"Unable to process the uploaded file. Please ensure it's a valid Form-16 PDF document. Error: {str(e)}")
 
         # --- 4. OCR Backup ---
         if result["gross_salary"] == 0.0:
-            ocr_text = self._extract_with_ocr(pdf_file)
-            ocr_data = self._extract_text_regex(ocr_text)
-            if ocr_data.get("gross_salary", 0) > 0:
-                result.update(ocr_data)
-                
-                # Try employer name in OCR
-                if result["employer_name"] == "Unknown":
-                     match = re.search(r"(?i)employer[:\s\n]+([A-Za-z0-9\s\.]+)", ocr_text)
-                     if match: 
-                        result["employer_name"] = match.group(1).split('\n')[0].strip()
+            try:
+                ocr_text = self._extract_with_ocr(pdf_file)
+                ocr_data = self._extract_text_regex(ocr_text)
+                if ocr_data.get("gross_salary", 0) > 0:
+                    result.update(ocr_data)
+                    
+                    # Try employer name in OCR
+                    if result["employer_name"] == "Unknown":
+                         match = re.search(r"(?i)employer[:\s\n]+([A-Za-z0-9\s\.]+)", ocr_text)
+                         if match: 
+                            result["employer_name"] = match.group(1).split('\n')[0].strip()
+            except:
+                pass
+
+        # Final validation
+        if result["gross_salary"] == 0.0:
+            raise ValueError("Unable to extract salary information from the uploaded file. Please ensure you've uploaded a valid Form-16 document with salary details.")
 
         return result

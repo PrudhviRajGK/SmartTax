@@ -7,6 +7,15 @@ import type {
   HousePropertyAggregate,
 } from '../types/tax.types';
 
+export interface EquityUpload {
+  broker: string;
+  stcg_before: number;
+  stcg_after: number;
+  ltcg_before: number;
+  ltcg_after: number;
+  uploadedAt: string;
+}
+
 interface SalarySection {
   status: SectionStatus;
   data: Form16Data | null;
@@ -29,6 +38,7 @@ interface ITR2State {
   equity: {
     status: SectionStatus;
     data: any;
+    uploads: EquityUpload[];
   };
   mutualFunds: {
     status: SectionStatus;
@@ -57,6 +67,9 @@ interface ITRContextValue {
   itr2State: ITR2State;
   updateITR1: (section: keyof ITR1State, data: any) => void;
   updateITR2: (section: keyof ITR2State, data: any) => void;
+  addEquityUpload: (upload: EquityUpload) => void;
+  removeEquityUpload: (index: number) => void;
+  getAggregatedEquityData: () => { stcg_before: number; stcg_after: number; ltcg_before: number; ltcg_after: number };
   resetITR1: () => void;
   resetITR2: () => void;
   validateSalaryData: (itrType: 'itr1' | 'itr2') => ValidationResult;
@@ -74,7 +87,7 @@ const INITIAL_ITR1_STATE: ITR1State = {
 
 const INITIAL_ITR2_STATE: ITR2State = {
   salary: { status: 'incomplete', data: null },
-  equity: { status: 'incomplete', data: null },
+  equity: { status: 'incomplete', data: null, uploads: [] },
   mutualFunds: { status: 'incomplete', data: null },
   houseProperty: {
     status: 'incomplete',
@@ -100,6 +113,10 @@ function loadStateFromStorage<T>(key: string, defaultValue: T): T {
     // Migration: if old single-property shape exists, reset house property
     if (parsed.houseProperty && !Array.isArray(parsed.houseProperty.properties)) {
       parsed.houseProperty = INITIAL_ITR2_STATE.houseProperty;
+    }
+    // Migration: if equity doesn't have uploads array, initialize it
+    if (parsed.equity && !Array.isArray(parsed.equity.uploads)) {
+      parsed.equity.uploads = [];
     }
     return parsed;
   } catch {
@@ -158,6 +175,64 @@ export const ITRProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  const addEquityUpload = (upload: EquityUpload) => {
+    setITR2State((prev) => {
+      const newUploads = [...prev.equity.uploads, upload];
+      const aggregated = newUploads.reduce(
+        (acc, u) => ({
+          stcg_before: acc.stcg_before + u.stcg_before,
+          stcg_after: acc.stcg_after + u.stcg_after,
+          ltcg_before: acc.ltcg_before + u.ltcg_before,
+          ltcg_after: acc.ltcg_after + u.ltcg_after,
+        }),
+        { stcg_before: 0, stcg_after: 0, ltcg_before: 0, ltcg_after: 0 }
+      );
+      return {
+        ...prev,
+        equity: {
+          status: 'complete',
+          data: aggregated,
+          uploads: newUploads,
+        },
+      };
+    });
+  };
+
+  const removeEquityUpload = (index: number) => {
+    setITR2State((prev) => {
+      const newUploads = prev.equity.uploads.filter((_, i) => i !== index);
+      const aggregated = newUploads.reduce(
+        (acc, u) => ({
+          stcg_before: acc.stcg_before + u.stcg_before,
+          stcg_after: acc.stcg_after + u.stcg_after,
+          ltcg_before: acc.ltcg_before + u.ltcg_before,
+          ltcg_after: acc.ltcg_after + u.ltcg_after,
+        }),
+        { stcg_before: 0, stcg_after: 0, ltcg_before: 0, ltcg_after: 0 }
+      );
+      return {
+        ...prev,
+        equity: {
+          status: newUploads.length > 0 ? 'complete' : 'incomplete',
+          data: newUploads.length > 0 ? aggregated : null,
+          uploads: newUploads,
+        },
+      };
+    });
+  };
+
+  const getAggregatedEquityData = () => {
+    return itr2State.equity.uploads.reduce(
+      (acc, u) => ({
+        stcg_before: acc.stcg_before + u.stcg_before,
+        stcg_after: acc.stcg_after + u.stcg_after,
+        ltcg_before: acc.ltcg_before + u.ltcg_before,
+        ltcg_after: acc.ltcg_after + u.ltcg_after,
+      }),
+      { stcg_before: 0, stcg_after: 0, ltcg_before: 0, ltcg_after: 0 }
+    );
+  };
+
   const resetITR1 = () => {
     setITR1State(INITIAL_ITR1_STATE);
     localStorage.removeItem(STORAGE_KEYS.ITR1);
@@ -195,6 +270,9 @@ export const ITRProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     itr2State,
     updateITR1,
     updateITR2,
+    addEquityUpload,
+    removeEquityUpload,
+    getAggregatedEquityData,
     resetITR1,
     resetITR2,
     validateSalaryData,

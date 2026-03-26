@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { FileUpload } from '../../../components/ui/FileUpload';
+import { ErrorAlert } from '../../../components/ui/ErrorAlert';
 import { useITR } from '../../../contexts/ITRContext';
 import { useLang } from '../../../contexts/LanguageContext';
 import { taxService } from '../../../services/tax.service';
@@ -80,8 +81,8 @@ export const ITR2Salary = () => {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <ErrorAlert message={error} onDismiss={() => setError('')} />
+      )}
         </div>
       )}
 
