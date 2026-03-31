@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import SmartTaxIcon from '../assets/SmartTaxIcon_v4.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { Input } from '../components/ui/Input';
@@ -34,9 +35,7 @@ const Login = () => {
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
-            <div className="w-14 h-14 bg-[rgb(var(--color-accent))] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all">
-              <span className="text-white font-bold text-[20px]">ST</span>
-            </div>
+            <img src={SmartTaxIcon} alt="SmartTax" className="w-14 h-14 mx-auto mb-4" />
           </Link>
           <h1 className="text-[32px] font-semibold text-[rgb(var(--color-text-primary))] tracking-tight">
             Welcome back
