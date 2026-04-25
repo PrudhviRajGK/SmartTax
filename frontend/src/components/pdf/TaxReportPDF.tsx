@@ -560,7 +560,7 @@ const ITR2Report = ({ state }: { state: any }) => {
             hasEquity ? ['Equity Stock Capital Gains', INR(stcgBefore + stcgAfter + ltcgBefore + ltcgAfter), INR(stockTax)] : null,
             hasMF     ? ['Equity Mutual Funds',         INR(eqStcg + eqLtcg),    INR(equityMfTax)] : null,
             hasDebtMFNote ? ['Debt MF (added to salary slab)',  INR(debtStcg + debtLtcg), 'at slab'] : null,
-          ].filter(Boolean).map(([label, amt, tax], i, arr) => (
+          ].filter(Boolean).map(([label, amt, tax], _i, _arr) => (
             <View key={String(label)} style={[S.tableRow, i % 2 !== 0 ? S.tableRowAlt : {}, i === arr.length - 1 ? S.tableRowLast : {}]}>
               <Text style={[S.tableCell, { flex: 1 }]}>{label as string}</Text>
               <Text style={[S.tableCell, S.tableCellRight, { width: 90 }]}>{amt as string}</Text>
@@ -647,7 +647,7 @@ const ITR2Report = ({ state }: { state: any }) => {
                   stcgAfter > 0  ? ['STCG — on/after 23 Jul 2024', INR(stcgAfter),  '20%', null] : null,
                   ltcgBefore > 0 ? ['LTCG — before 23 Jul 2024', INR(ltcgBefore), '10%', null] : null,
                   ltcgAfter > 0  ? ['LTCG — on/after 23 Jul 2024', INR(ltcgAfter),  '12.5%', null] : null,
-                ].filter(Boolean).map(([desc, gains, rate, _tax], i) => (
+                ].filter(Boolean).map(([desc, gains, rate, _tax], _i) => (
                   <View key={String(desc)} style={[S.tableRow, i % 2 !== 0 ? S.tableRowAlt : {}]}>
                     <Text style={[S.tableCell, { flex: 1 }]}>{desc as string}</Text>
                     <Text style={[S.tableCell, S.tableCellRight, { width: 70 }]}>{gains as string}</Text>
@@ -738,7 +738,7 @@ const ITR2Report = ({ state }: { state: any }) => {
             HP losses cannot be set off against salary — carried forward up to 8 years (intra-head only).
           </Text>
 
-          {hpProperties.map((entry: HousePropertyEntry, idx: number) => {
+          {hpProperties.map((entry: HousePropertyEntry, _idx: number) => {
             const inp = entry.input;
             const res = entry.result;
             if (!res) return null;
@@ -934,7 +934,7 @@ const ITR2Report = ({ state }: { state: any }) => {
             [(stcgAfter > 0 || eqStcg > 0) ? 'Section 87A: verify on portal for CG income' : 'Section 87A checked', (stcgAfter === 0 && eqStcg === 0)],
             ['Tax calculation complete', true],
             [isRefund ? 'Refund claim ready — file ITR to initiate' : 'Challan 280 payment required before filing', true],
-          ].filter(Boolean).map(([label, ok], i, arr) => (
+          ].filter(Boolean).map(([label, ok], _i, _arr) => (
             <View key={String(label)} style={[S.tableRow, i % 2 !== 0 ? S.tableRowAlt : {}, i === arr.length - 1 ? S.tableRowLast : {}]}>
               <Text style={[S.tableCell, { flex: 1 }]}>{ok ? 'v' : 'o'}  {label as string}</Text>
               <Text style={[S.tableCell, { color: ok ? GREEN : AMBER, fontWeight: 700, width: 60, textAlign: 'right' }]}>{ok ? 'Done' : 'Check'}</Text>
