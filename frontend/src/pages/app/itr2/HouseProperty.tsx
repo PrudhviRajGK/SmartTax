@@ -9,7 +9,7 @@ import type {
 function makeId() { return Math.random().toString(36).slice(2, 9); }
 
 function makeDefaultInput(index: number): HousePropertyInput {
-  return { id: makeId(), label: `Property ${index + 1}`, property_type: 'SOP', gross_rent_received: 0, expected_market_rent: 0, municipal_taxes_paid: 0, home_loan_interest: 0, unrealized_rent: 0, vacancy_loss: 0, pre_construction_interest: 0 };
+  return { id: makeId(), label: `Property ${index + 1}`, property_type: 'SOP', gross_rent_received: 0, expected_market_rent: 0, municipal_taxes_paid: 0, home_loan_interest: 0 } as any;
 }
 
 const fmt = (n: number) => '₹' + Math.abs(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
@@ -63,9 +63,9 @@ export default function HouseProperty() {
           expected_market_rent: entry.input.expected_market_rent,
           municipal_taxes_paid: entry.input.municipal_taxes_paid,
           home_loan_interest:   entry.input.home_loan_interest,
-          vacancy_loss:         entry.input.vacancy_loss         ?? 0,
-          unrealized_rent:      entry.input.unrealized_rent      ?? 0,
-          pre_construction_interest: entry.input.pre_construction_interest ?? 0,
+          vacancy_loss:         (entry.input as any).vacancy_loss         ?? 0,
+          unrealized_rent:      (entry.input as any).unrealized_rent      ?? 0,
+          pre_construction_interest: (entry.input as any).pre_construction_interest ?? 0,
         }),
       });
       const json = await res.json();
@@ -114,7 +114,7 @@ export default function HouseProperty() {
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('hp.subtitle')}</p>
       </div>
 
-      {entries.map((entry, idx) => {
+      {entries.map((entry, _idx) => {
         const { input, result } = entry;
         const isRented = input.property_type === 'LOP' || input.property_type === 'DLOP';
         const loading = !!loadingMap[input.id];
