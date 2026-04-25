@@ -759,7 +759,7 @@ const TaxAdvisorChat = () => {
     // === TAX CALCULATION RESULTS (CRITICAL: Use actual computed values) ===
     const result = activeITR.calculationResult;
     if (result) {
-      const finalTaxSummary = result.finalTaxSummary || {};
+      const finalTaxSummary = result.finalTaxSummary || {} as any;
       
       context.calculation = {
         // Individual tax components (from backend calculation)
