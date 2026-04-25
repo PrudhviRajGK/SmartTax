@@ -525,7 +525,7 @@ export default function Landing() {
               ))}
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ background: C.bgCard, borderRadius: 14, border: `1px solid ${C.border}`, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,.07)", overflow: "hidden" }}>
+              <div style={{ background: C.bgCard, borderRadius: 14, border: `1px solid ${C.border}`, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,.07)" }}>
                 <div style={{ padding: "14px 18px", background: C.bgAlt, borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{ display: "flex", gap: 5 }}>
                     {["#fca5a5","#fde68a","#bbf7d0"].map(c => <div key={c} style={{ width: 9, height: 9, borderRadius: "50%", background: c }} />)}
@@ -714,7 +714,7 @@ export default function Landing() {
                 { label: "Supabase Auth", sub: "Secure login" },
                 { label: "Documents Purged", sub: "After parsing" },
               ].map(c => (
-                <div key={c.label} style={{ background: C.bgAlt, border: `1px solid ${C.border}`, borderRadius: 12, padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", textAlign: "center" }}>
+                <div key={c.label} style={{ background: C.bgAlt, border: `1px solid ${C.border}`, borderRadius: 12, padding: "28px 20px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
                   <div style={{ width: 44, height: 44, background: "#eff6ff", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
                     <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#1d4ed8" strokeWidth="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#1d4ed8" strokeWidth="2"/></svg>
                   </div>
@@ -861,7 +861,7 @@ export default function Landing() {
                 { label: "Email Us", val: "support@smarttax.in", sub: "Response within 24 hours", icon: <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="#0369a1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg> },
                 { label: "WhatsApp", val: "+91 98765 43212", sub: "Quick queries via chat", icon: <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#16a34a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg> },
               ].map(c => (
-                <div key={c.label} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, transition: "transform 0.2s", padding: "24px 20px", textAlign: "center", transition: "box-shadow .2s, transform .2s" }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow="0 8px 28px rgba(0,0,0,0.08)"; (e.currentTarget as HTMLElement).style.transform="translateY(-3px)"; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow="none"; (e.currentTarget as HTMLElement).style.transform="none"; }}>
+                <div key={c.label} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 14, padding: "24px 20px", textAlign: "center", transition: "box-shadow .2s, transform .2s" }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow="0 8px 28px rgba(0,0,0,0.08)"; (e.currentTarget as HTMLElement).style.transform="translateY(-3px)"; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow="none"; (e.currentTarget as HTMLElement).style.transform="none"; }}>
                   <div style={{ width: 44, height: 44, background: "#f8fafc", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>{c.icon}</div>
                   <p style={{ fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 4 }}>{c.label}</p>
                   <p style={{ fontSize: 14, fontWeight: 600, color: "#1d4ed8", marginBottom: 4 }}>{c.val}</p>

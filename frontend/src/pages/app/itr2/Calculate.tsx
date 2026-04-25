@@ -260,8 +260,8 @@ const ITR2Calculate = () => {
                 <div className={`text-[11px] font-medium px-3 py-1.5 rounded-lg ${hpNetIncome > 0 ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' : 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400'}`}>
                   {hpNetIncome > 0 ? '↑ Increases tax base' : '↷ Carry fwd 8 years'}
                 </div>
-                {itr2State.houseProperty?.aggregate?.properties?.length > 0 && (
-                  <p className="text-[11px] text-gray-400 mt-1.5">{itr2State.houseProperty.aggregate.properties.length} propert{itr2State.houseProperty.aggregate.properties.length === 1 ? 'y' : 'ies'}</p>
+                {(itr2State.houseProperty?.aggregate?.properties?.length ?? 0) > 0 && (
+                  <p className="text-[11px] text-gray-400 mt-1.5">{itr2State.houseProperty?.aggregate?.properties?.length} propert{(itr2State.houseProperty?.aggregate?.properties?.length ?? 0) === 1 ? 'y' : 'ies'}</p>
                 )}
               </div>
             </div>

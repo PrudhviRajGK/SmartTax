@@ -33,7 +33,7 @@ export const ITR2Sidebar = () => {
           ITR-2 Workspace
         </h2>
         <nav className="space-y-0.5">
-          {sections.map((section, idx) => {
+          {sections.map((section, _idx) => {
             const isActive = location.pathname === section.path;
             return (
               <Link

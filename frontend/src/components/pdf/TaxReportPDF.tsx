@@ -200,7 +200,7 @@ const S = StyleSheet.create({
 
 // ─── Reusable Components ──────────────────────────────────────────────────────
 
-const PageHeader = ({ itrType, page }: { itrType: string; page: number }) => (
+const PageHeader = ({ itrType }: { itrType: string; page: number }) => (
   <View style={S.header} fixed>
     <View style={S.headerLeft}>
       {/* Header wordmark — SMART bold navy + tax regular blue */}

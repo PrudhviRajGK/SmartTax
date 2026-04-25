@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Navbar } from '../components/layout/Navbar';
 
 const SectionAnchor = ({ id }: { id: string }) => <div id={id} style={{ scrollMarginTop: 96 }} />;
