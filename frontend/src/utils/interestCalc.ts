@@ -118,7 +118,7 @@ export function calc234C(
   }
 
   // TDS is treated as advance tax distributed evenly across quarters
-  const totalAdvance = tds + advanceTaxPaid;
+  // const totalAdvance = tds + advanceTaxPaid;
   // Assume TDS is proportional to quarter (each quarter = 25% of annual TDS)
   const tdsPerQuarter = tds / 4;
 
