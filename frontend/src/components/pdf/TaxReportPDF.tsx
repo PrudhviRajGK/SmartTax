@@ -249,7 +249,7 @@ const WRow = ({
   </View>
 );
 
-const Divider = () => <View style={S.divider} />;
+// const Divider = () => <View style={S.divider} />;
 
 // ─── Cover Page ───────────────────────────────────────────────────────────────
 
@@ -412,7 +412,7 @@ const ITR1Report = ({ state }: { state: any }) => {
           {[
             ['Total Tax Liability',              INR(totalTax),         false],
             ['Less: TDS Deducted by Employer',   `− ${INR(tds)}`,       false],
-          ].map(([label, value, _], i) => (
+          ].map(([label, value, _], _i) => (
             <View key={String(label)} style={[S.reconcileRow]}>
               <Text style={S.reconcileLabel}>{label as string}</Text>
               <Text style={S.reconcileValue}>{value as string}</Text>
@@ -497,12 +497,12 @@ const ITR2Report = ({ state }: { state: any }) => {
   const stcgAfter     = r.parsedStockGains?.stcg_after ?? 0;
   const ltcgBefore    = r.parsedStockGains?.ltcg_before ?? 0;
   const ltcgAfter     = r.parsedStockGains?.ltcg_after ?? 0;
-  const stcgTax       = r.stockTaxComputation?.stcgTax ?? 0;
-  const ltcgTax       = r.stockTaxComputation?.ltcgTax ?? 0;
+  // const stcgTax       = r.stockTaxComputation?.stcgTax ?? 0;
+  // const ltcgTax       = r.stockTaxComputation?.ltcgTax ?? 0;
   const eqStcg        = r.equityMutualFunds?.stcg ?? 0;
   const eqLtcg        = r.equityMutualFunds?.ltcg ?? 0;
   const eqTaxableLtcg = r.equityMutualFunds?.taxableLtcg ?? 0;
-  const eqMfTax       = r.equityMutualFunds?.equityMfTax ?? 0;
+  // const eqMfTax       = r.equityMutualFunds?.equityMfTax ?? 0;
   const debtStcg      = r.debtMutualFunds?.debtStcg ?? 0;
   const debtLtcg      = r.debtMutualFunds?.debtLtcg ?? 0;
 
